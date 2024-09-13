@@ -36,6 +36,8 @@ Encode REGEX using [URL encoding](https://www.urlencoder.org/).
 
 ## Example URLs
 
+### Import any of these iCAL URL in your Calendar App to import Liquipedia data into your calendar.
+
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches
 
 League of Legends, all matches
