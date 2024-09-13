@@ -10,7 +10,7 @@ It parses the Liquipedia match page in real time and returns events as ICS.
 
 ## How does it work ?
 
-Find the match page of the game you want. For example [Rocket League](https://liquipedia.net/rocketleague/Liquipedia:Matches) or [League of Legends](https://liquipedia.net/leagueoflegends/Liquipedia:Matches). **Strictly use pages of this format or it won't work.**
+Find the match page of the game you want. For example [Rocket League](https://liquipedia.net/rocketleague/Liquipedia:Matches) or [League of Legends](https://liquipedia.net/leagueoflegends/Liquipedia:Matches). <ins>Strictly use pages of this format or it won't work.</ins>
 
 Your calendar URL is `https://ics.snwfdhmp.com/matches.ics?url=<your_url>`.
 
