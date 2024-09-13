@@ -180,6 +180,14 @@ const buildCalendar = (events) => {
 // fs.writeFileSync("rocket.ics", cal)
 
 const app = express()
+// log requests
+app.use((req, res, next) => {
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress
+  console.log(
+    `${ip.padEnd(15)} ${req.method} ${req.url}${JSON.stringify(req.query)}`
+  )
+  next()
+})
 app.get("/", (req, res) => {
   res.send("com.snwfdhmp.liquipedia-calendar")
 })
