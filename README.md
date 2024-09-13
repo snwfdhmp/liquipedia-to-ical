@@ -17,15 +17,16 @@ Your calendar URL is `https://ics.snwfdhmp.com/matches.ics?url=<your_url>`.
 It will produce events like this:
 
 ![Example Calendar Event](https://i.imgur.com/ygMA306.png)
-{: width="800px"}
 
 ## How to filter only matches I'm interested in ?
 
 Use URL parameters :
 
-- competition_regex: Filter competition using REGEX.
-- teams_regex: Filter teams using REGEX. Use team tags (eg: KC, T1)
-- condition_is_or: Set to "true" if you want competition_regex and teams_regex to be tested as an OR condition (by default, its AND).
+| Parameter name      | Description                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `competition_regex` | Filter competition using REGEX.                                                                                    |
+| `teams_regex`       | Filter teams using REGEX. Use team tags (eg: KC, T1)                                                               |
+| `condition_is_or`   | Set to "true" if you want competition_regex and teams_regex to be tested as an OR condition (by default, its AND). |
 
 Encode REGEX using [URL encoding](https://www.urlencoder.org/).
 
