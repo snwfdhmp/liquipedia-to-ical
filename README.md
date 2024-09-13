@@ -54,11 +54,15 @@ League of Legends, Worlds and LCK matches
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches&competition_regex=%5EWorlds&condition_is_or=true&teams_regex=%5E%28KC%7CM8%7CVIT%7CBDS%7CG2%29%24
 
-League of Legends, Worlds matches + any matches featuring KC or M8 or VIT or BDS or G2
+League of Legends, Worlds matches + any match featuring KC or M8 or VIT or BDS or G2
+
+### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches
+
+Rocket League, all matches
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&competition_regex=%5EWorlds
 
-Rocket League, only "Worlds" matches
+Rocket League, only Worlds matches
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&teams_regex=%5EKC%24
 
@@ -67,6 +71,10 @@ Rocket League, only matches featuring KC
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&competition_regex=Major
 
 Rocket League, only competitions that have "Major" in their name
+
+# https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&%5ERLCS&refresh_id=123456&condition_is_or=true%5E%28KC%7CM8%7CVIT%7CG2%7CBDS%29%24
+
+Rocket League, Worlds matches + any match featuring KC or M8 or VIT or BDS or G2
 
 ## Compatibility
 
