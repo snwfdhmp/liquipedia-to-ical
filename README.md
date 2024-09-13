@@ -69,3 +69,7 @@ Feel free to report any issue or any working/broken game in [issues](https://git
 ## Contribute
 
 Pull Requests are welcome, please follow standard rules.
+
+## Help
+
+Reach out to me in GitHub issues or discord : `@mjo___`
