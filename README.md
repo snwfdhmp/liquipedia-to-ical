@@ -42,7 +42,7 @@ League of Legends, only LEC matches
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches&competition_regex=%5EWorlds&condition_is_or=true&teams_regex=%5E%28KC%7CM8%7CVIT%7CBDS%7CG2%29%24
 
-League of Legends, only Worlds matches and also any matches featuring KC or M8 or VIT or BDS or G2
+League of Legends, Worlds matches + any matches featuring KC or M8 or VIT or BDS or G2
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&competition_regex=%5EWorlds
 
