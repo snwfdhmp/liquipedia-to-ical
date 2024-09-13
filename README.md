@@ -2,15 +2,15 @@
 
 ## What is it ?
 
-I was tired of not having any simple way of adding esport matches to my calendar. Some apps try to achieve that but none is really simple and integrates well in my workflow. So I build this.
+I was tired of not having any simple way of adding esport matches to my calendar. Some apps tried to achieve that but none really achieved that simply and none integrates well into my workflow. So I build this.
 
-This service lets import iCal URLs, also known as .ICS URLs, based on Liquipedia pages.
+This service lets you use **Liquipedia match pages as iCal URLs**, also known as .ICS URLs.
 
-It parses the Liquipedia match page and returns events as ICS.
+It parses the Liquipedia match page in real time and returns events as ICS.
 
 ## How does it work ?
 
-Find the match page you want. For example [Rocket League](https://liquipedia.net/rocketleague/Liquipedia:Matches) or [League of Legends](https://liquipedia.net/leagueoflegends/Liquipedia:Matches). Strictly use pages of this format or it won't work.
+Find the match page of the game you want. For example [Rocket League](https://liquipedia.net/rocketleague/Liquipedia:Matches) or [League of Legends](https://liquipedia.net/leagueoflegends/Liquipedia:Matches). **Strictly use pages of this format or it won't work.**
 
 Your calendar URL is `https://ics.snwfdhmp.com/matches.ics?url=<your_url>`.
 
