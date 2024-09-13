@@ -74,7 +74,7 @@ Rocket League, only matches featuring KC
 
 Rocket League, only competitions that have "Major" in their name
 
-### 📅 https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&%5ERLCS&refresh_id=123456&condition_is_or=true%5E%28KC%7CM8%7CVIT%7CG2%7CBDS%29%24
+### 📅 https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&%5ERLCS&condition_is_or=true&teams=%5E%28KC%7CM8%7CVIT%7CG2%7CBDS%29%24
 
 Rocket League, Worlds matches + any match featuring KC or M8 or VIT or BDS or G2
 
