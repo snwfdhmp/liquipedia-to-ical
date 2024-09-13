@@ -31,6 +31,7 @@ Use URL parameters :
 | `competition_regex` | Filter competition using REGEX.                                                                                    |
 | `teams_regex`       | Filter teams using REGEX. Use team tags (eg: KC, T1)                                                               |
 | `condition_is_or`   | Set to "true" if you want competition_regex and teams_regex to be tested as an OR condition (by default, its AND). |
+| `ignore_tbd`        | Ignore matches that have "TBD" as team1 and team2 (TBD = To Be Done) (ie: announced match with unannounced teams)  |
 
 Encode REGEX using [URL encoding](https://www.urlencoder.org/).
 
@@ -84,6 +85,7 @@ Rocket League, Worlds matches + any match featuring KC or M8 or VIT or BDS or G2
 | ----------------- | ------------------------ |
 | Rocket League     | ✅                       |
 | League of Legends | ✅                       |
+| Counter-Strike    | ✅                       |
 | Other games       | Test yourself and report |
 
 Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
