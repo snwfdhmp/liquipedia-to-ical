@@ -12,11 +12,15 @@ It parses the Liquipedia match page in real time and returns events as ICS.
 
 Find the match page of the game you want. For example [Rocket League](https://liquipedia.net/rocketleague/Liquipedia:Matches) or [League of Legends](https://liquipedia.net/leagueoflegends/Liquipedia:Matches). <ins>Strictly use pages of this format or it won't work.</ins>
 
-Your calendar URL is `https://ics.snwfdhmp.com/matches.ics?url=<your_url>`.
+Copy the page URL and put it in this URL: `https://ics.snwfdhmp.com/matches.ics?url=YOUR_URL`.
 
-It will produce events like this:
+Example URLs below on this page.
+
+Import this URL in your Calendar App and it will produce events like this.
 
 ![Example Calendar Event](https://i.imgur.com/ygMA306.png)
+
+Events will be updated regularly with new matches. Every time the Calendar URL is fetched, it parses the Liquipedia page for new matches.
 
 ## How to filter only matches I'm interested in ?
 
@@ -31,6 +35,10 @@ Use URL parameters :
 Encode REGEX using [URL encoding](https://www.urlencoder.org/).
 
 ## Example URLs
+
+### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches
+
+League of Legends, all matches
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches&competition_regex=%5EWorlds
 
