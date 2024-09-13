@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/local/bin/node /opt/github.com/snwfdhmp/liquipedia-cal/main.js
+ExecStart=/usr/local/bin/node /opt/github.com/snwfdhmp/liquipedia-cal/main.js -q
 Restart=on-failure
 RestartSec=10
 

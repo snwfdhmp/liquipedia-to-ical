@@ -3,6 +3,11 @@ import axios from "axios"
 import * as cheerio from "cheerio"
 import express from "express"
 
+let VERBOSE = true
+
+// if -q is passed, disable verbose
+if (process.argv.includes("-q")) VERBOSE = false
+
 // URL à fetch
 // const url = "https://liquipedia.net/rocketleague/Liquipedia:Matches"
 
@@ -100,8 +105,12 @@ async function fetchMatches(
       // if condition is AND, need both to be true
       if (!conditionIsOr && (!competitionOk || !teamsOk)) return
       events.push(eventData)
-      console.log({ eventData })
+      if (VERBOSE) console.log({ eventData })
     })
+
+    console.log(
+      `${events.length} matches fetched from ${url}\tcompetition_regex=${competitionRegex}\tteams_regex=${teamsRegex}\tcondition_is_or=${conditionIsOr}`
+    )
 
     // Retourner les événements sous forme d'ICS
     return events
@@ -184,7 +193,9 @@ const app = express()
 app.use((req, res, next) => {
   const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress
   console.log(
-    `${ip.padEnd(15)} ${req.method} ${req.url}${JSON.stringify(req.query)}`
+    `${new Date().toISOString()}\t${ip.padEnd(15)} ${req.method} ${
+      req.url
+    }${JSON.stringify(req.query)}`
   )
   next()
 })
@@ -193,8 +204,7 @@ app.get("/", (req, res) => {
 })
 app.get("/matches.ics", async (req, res) => {
   // read url, competition_regex and teams_regex from query params
-
-  console.log({ query: req.query })
+  if (VERBOSE) console.log({ query: req.query })
   const {
     url,
     competition_regex: competitionRegex,
