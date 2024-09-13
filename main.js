@@ -29,12 +29,8 @@ const teamsMatches = (event, competitionRegex) => {
 }
 
 // Fonction pour récupérer les matchs à venir de Rocket League
-async function fetchMatches(
-  url,
-  competitionRegex,
-  teamsRegex,
-  conditionIsOr = false
-) {
+async function fetchMatches(url, competitionRegex, teamsRegex, opts) {
+  const { conditionIsOr = false, ignoreTbd = false } = opts || {}
   try {
     // Fetch de la page
     const response = await axios.get(url)
@@ -63,6 +59,10 @@ async function fetchMatches(
         .trim()
 
       if (!team1 || !team2) return
+
+      if (ignoreTbd) {
+        if (team1 === "TBD" || team2 === "TBD") return
+      }
 
       // OLD WAY OF OBTAINING COMPETITION, DOES NOT WORK FOR ALL GAMES
       // const competition = $(element)
@@ -108,8 +108,15 @@ async function fetchMatches(
       if (VERBOSE) console.log({ eventData })
     })
 
+    // display all opts as \t separated string
     console.log(
-      `${events.length} matches fetched from ${url}\tcompetition_regex=${competitionRegex}\tteams_regex=${teamsRegex}\tcondition_is_or=${conditionIsOr}`
+      `${
+        events.length
+      } matches fetched from ${url}\tcompetition_regex=${competitionRegex}\tteams_regex=${teamsRegex}\t${Object.entries(
+        opts
+      )
+        .map(([key, value]) => `${key}=${value}`)
+        .join("\t")}`
     )
 
     // Retourner les événements sous forme d'ICS
@@ -171,7 +178,6 @@ const buildCalendar = (events) => {
       DTSTART;TZID=Europe/Paris:${timestampToIcs(event.dateTimestamp)}
       DURATION: PT1H
       SUMMARY:${event.summary}
-      DESCRIPTION:${event.competition}
       END:VEVENT
     `
         .split("\n")
@@ -210,6 +216,7 @@ app.get("/matches.ics", async (req, res) => {
     competition_regex: competitionRegex,
     teams_regex: teamsRegex,
     condition_is_or: conditionIsOr,
+    ignore_tbd: ignoreTbd,
   } = req.query
 
   if (!url) {
@@ -224,7 +231,10 @@ app.get("/matches.ics", async (req, res) => {
 
   try {
     const ics = buildCalendar(
-      await fetchMatches(url, competitionRegex, teamsRegex, conditionIsOr)
+      await fetchMatches(url, competitionRegex, teamsRegex, {
+        conditionIsOr,
+        ignoreTbd,
+      })
     )
     res.setHeader("Content-Type", "text/calendar; charset=utf-8")
     res.setHeader("Content-Disposition", "attachment; filename=calendar.ics")
