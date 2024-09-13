@@ -193,6 +193,7 @@ app.get("/", (req, res) => {
 })
 app.get("/matches.ics", async (req, res) => {
   // read url, competition_regex and teams_regex from query params
+
   console.log({ query: req.query })
   const {
     url,
@@ -200,8 +201,14 @@ app.get("/matches.ics", async (req, res) => {
     teams_regex: teamsRegex,
     condition_is_or: conditionIsOr,
   } = req.query
+
   if (!url) {
     res.status(400).send("Missing url query param")
+    return
+  }
+
+  if (!url.startsWith("https://liquipedia.net/")) {
+    res.status(403).send("Use liquipedia URL")
     return
   }
 
