@@ -48,10 +48,6 @@ League of Legends, only Worlds matches
 
 League of Legends, only LEC matches
 
-### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches&competition_regex=%5ELCK
-
-League of Legends, only LCK matches
-
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches&competition_regex=%5E%28Worlds%7CLCK%29
 
 League of Legends, Worlds and LCK matches
