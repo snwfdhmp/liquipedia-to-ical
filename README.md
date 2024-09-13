@@ -32,14 +32,32 @@ Encode REGEX using [URL encoding](https://www.urlencoder.org/).
 
 ## Example URLs
 
+### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches&competition_regex=%5EWorlds
+
+League of Legends, only Worlds matches
+
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/leagueoflegends/Liquipedia:Matches&competition_regex=%5EWorlds&condition_is_or=true&teams_regex=%5E%28KC%7CM8%7CVIT%7CBDS%7CG2%29%24
 
-League of Legends, shows Worlds matches and also any matches featuring KC or M8 or VIT or BDS or G2
+League of Legends, only Worlds matches and also any matches featuring KC or M8 or VIT or BDS or G2
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&teams_regex=%5EKC%24
 
-Rocket League, shows only matches featuring KC
+Rocket League, only matches featuring KC
 
 ### https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&competition_regex=Major
 
-Rocket League, shows only competitions that have 'Major' in their name
+Rocket League, only competitions that have 'Major' in their name
+
+## Compatibility
+
+| Game              | Working                  |
+| ----------------- | ------------------------ |
+| Rocket League     | ✅                       |
+| League of Legends | ✅                       |
+| Other games       | Test yourself and report |
+
+Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
+
+## Contribute
+
+Pull Requests are welcome, please follow standard rules.
