@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "name": "liquipedia-cal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "prettier": {
+    "semi": false
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "express": "^4.21.0",
+    "node-fetch": "2"
+  }
+}
