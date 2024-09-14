@@ -23,7 +23,7 @@ Example URLs below on this page.
 
 Import this URL in your Calendar App and it will produce events like this.
 
-![Example Calendar Event](https://i.imgur.com/ygMA306.png)
+![Example Calendar Event](https://i.imgur.com/LYT2wIt.png)
 
 Events will be updated regularly with new matches. Every time the Calendar URL is fetched, it parses the Liquipedia page for new matches.
 
@@ -104,6 +104,8 @@ Feel free to report any issue or any working/broken game in [issues](https://git
 
 Pull Requests are welcome, please follow standard rules.
 
-## Help
+## Need help ?
 
-Reach out to me in GitHub issues or discord : `@mjo___`
+I made [this website](https://ics.snwfdhmp.com) to help you build your URL.
+
+You can also reach out to me using GitHub issues or discord : `@mjo___`.
