@@ -1,5 +1,7 @@
 # Liquipedia to iCal
 
+[![Liquipedia to iCal](https://i.imgur.com/GgW2kgA.png)](https://ics.snwfdhmp.com)
+
 ## What is it ?
 
 I was tired of not having any simple way of adding esport matches to my calendar. Some apps tried to achieve that but none really achieved that simply and none integrates well into my workflow. So I build this.
@@ -78,6 +80,10 @@ Rocket League, only competitions that have "Major" in their name
 ### 📅 https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/rocketleague/Liquipedia:Matches&competition_regex=%5ERLCS&condition_is_or=true&teams_regex=%5E%28KC%7CM8%7CVIT%7CG2%7CBDS%29%24
 
 Rocket League, Worlds matches + any match featuring KC or M8 or VIT or BDS or G2
+
+### 📅 https://ics.snwfdhmp.com/matches.ics?url=https://liquipedia.net/counterstrike/Liquipedia:Matches&ignore_tbd=true
+
+Counter-Strike, all matches except "TBD" (unknown teams)
 
 ## Compatibility
 
