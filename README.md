@@ -95,6 +95,7 @@ Counter-Strike, all matches except "TBD" (unknown teams)
 | Rocket League     | ✅                       |
 | League of Legends | ✅                       |
 | Counter-Strike    | ✅                       |
+| Starcraft 2       | ✅                       |
 | Other games       | Test yourself and report |
 
 Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
