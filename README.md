@@ -25,7 +25,7 @@ Import this URL in your Calendar App and it will produce events like this.
 
 ![Example Calendar Event](https://i.imgur.com/LYT2wIt.png)
 
-Events will be updated regularly with new matches. Every time the Calendar URL is fetched, it parses the Liquipedia page for new matches.
+> "???" means that the opponent is not yet defined and will be later when the competition administrators announce the opponent officially.
 
 ## How to filter only matches I'm interested in ?
 
