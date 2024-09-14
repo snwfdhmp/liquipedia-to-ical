@@ -2,6 +2,9 @@
 
 [![Liquipedia to iCal](https://i.imgur.com/GgW2kgA.png)](https://ics.snwfdhmp.com)
 
+- Sync Liquipedia matches to your Calendar.
+- Events are refreshed when the iCal URL is re-fetched by your Calendar. (generally every 15 minutes)
+
 ## What is it ?
 
 I was tired of not having any simple way of adding esport matches to my calendar. Some apps tried to achieve that but none really achieved that simply and none integrates well into my workflow. So I build this.
