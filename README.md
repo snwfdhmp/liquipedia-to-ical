@@ -2,6 +2,8 @@
 
 [![Liquipedia to iCal](https://i.imgur.com/GgW2kgA.png)](https://ics.snwfdhmp.com)
 
+![Example Calendar Event](https://i.imgur.com/LYT2wIt.png)
+
 - Sync Liquipedia matches to your Calendar.
 - Events are refreshed when the iCal URL is re-fetched by your Calendar. (generally every 15 minutes)
 
@@ -94,8 +96,11 @@ Counter-Strike, all matches except "TBD" (unknown teams)
 | ----------------- | ------------------------ |
 | Rocket League     | ✅                       |
 | League of Legends | ✅                       |
+| Trackmania        | ✅                       |
 | Counter-Strike    | ✅                       |
 | Starcraft 2       | ✅                       |
+| VALORANT          | ✅                       |
+| Overwatch         | ✅                       |
 | Other games       | Test yourself and report |
 
 Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
