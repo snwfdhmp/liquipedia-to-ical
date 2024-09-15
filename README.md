@@ -1,4 +1,4 @@
-# Liquipedia to iCal
+# Liquipedia to iCal URL
 
 [![Liquipedia to iCal](https://i.imgur.com/aBfBPuN.png)](https://ics.snwfdhmp.com)
 
@@ -33,12 +33,13 @@ Import this URL in your Calendar App and it will produce events like this.
 
 Use URL parameters :
 
-| Parameter name      | Description                                                                                                        |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `competition_regex` | Filter competition using REGEX.                                                                                    |
-| `teams_regex`       | Filter teams using REGEX. Use team tags (eg: KC, T1)                                                               |
-| `condition_is_or`   | Set to "true" if you want competition_regex and teams_regex to be tested as an OR condition (by default, its AND). |
-| `ignore_tbd`        | Ignore matches that have "TBD" as team1 and team2 (TBD = To Be Done) (ie: announced match with unannounced teams)  |
+| Parameter name              | Description                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `competition_regex`         | Filter competition using REGEX.                                                                                    |
+| `teams_regex`               | Filter teams using REGEX. Use team tags (eg: KC, T1)                                                               |
+| `teams_regex_use_fullnames` | Set to "true" to use full team names instead of tags for `teams_regex` (eg: "Karmine Corp" instead of "KC")        |
+| `condition_is_or`           | Set to "true" if you want competition_regex and teams_regex to be tested as an OR condition (by default, its AND). |
+| `ignore_tbd`                | Ignore matches that have "TBD" as team1 and team2 (TBD = To Be Done) (ie: announced match with unannounced teams)  |
 
 Encode REGEX using [URL encoding](https://www.urlencoder.org/).
 
