@@ -12,25 +12,34 @@ if (process.argv.includes("-q")) VERBOSE = false
 // const url = "https://liquipedia.net/rocketleague/Liquipedia:Matches"
 
 // const inputCompetitionRegex = "^RLCS"
-const competitionMatches = (event, competitionRegex) => {
-  if (!event.competition.match(competitionRegex)) return false
+const competitionMatches = (event, regex) => {
+  if (!event.competition.match(regex)) return false
   return true
 }
 
 // const inputTeamsMatches = "^(KC|M8|VIT)$"
 // const inputTeamsMatches = ""
-const teamsMatches = (event, competitionRegex) => {
-  if (
-    !event.team1.match(competitionRegex) &&
-    !event.team2.match(competitionRegex)
-  )
+const teamsMatches = (event, regex) => {
+  if (!event.team1.match(regex) && !event.team2.match(regex)) return false
+  return true
+}
+
+const teamsFullnameMatches = (event, regex) => {
+  if (!event.team1fullName.match(regex) && !event.team2fullName.match(regex))
     return false
   return true
 }
 
 // Fonction pour récupérer les matchs à venir de Rocket League
-async function fetchMatches(url, competitionRegex, teamsRegex, opts) {
-  const { conditionIsOr = false, ignoreTbd = false } = opts || {}
+async function fetchMatches(url, opts) {
+  const {
+    competitionRegex = ``,
+    teamsRegex = ``,
+    teamsRegexUseFullnames = false,
+    conditionIsOr = false,
+    ignoreTbd = false,
+    shouldVerbose = false,
+  } = opts || {}
   try {
     // Fetch de la page
     const response = await axios.get(url)
@@ -41,27 +50,58 @@ async function fetchMatches(url, competitionRegex, teamsRegex, opts) {
     // Tableau pour stocker les événements
     const events = []
 
+    // test if element exists
+    const containerSelectorsToTry = [
+      // ".matches-list div:nth-child(2) div:nth-child(2) .infobox_matches_content",
+      // first parent of .infobox_matches_content
+      ".wikitable",
+    ]
+
+    let elements = null
+    for (const selector of containerSelectorsToTry) {
+      elements = $(selector)
+      if (elements.length > 0) break
+    }
+
     // Sélection des éléments du tableau de matchs
-    $(
-      ".matches-list div:nth-child(2) div:nth-child(2) .infobox_matches_content"
-    ).each((index, element) => {
+    elements.each((index, element) => {
+      // if (shouldVerbose) {
+      //   console.log(`ELEMENT TEXT: ${$(element).text()}`)
+      // }
       // Récupération des dates, équipes et nom de la compétition
       const dateTimestamp = parseInt(
         $(element).find(".timer-object").attr("data-timestamp")
       )
-      const team1 = $(element)
-        .find(".team-left span.team-template-text")
-        .text()
-        .trim()
-      const team2 = $(element)
-        .find(".team-right span.team-template-text")
-        .text()
-        .trim()
 
-      if (!team1 || !team2) return
+      if (dateTimestamp < Date.now() / 1000 - 3600 * 2) {
+        // if (shouldVerbose) console.log("Ignoring match too old")
+        return
+      }
+      let team1 =
+        $(element).find(".team-left span.team-template-text").text().trim() ||
+        $(element).find(".team-left").text().trim()
+      let team2 =
+        $(element).find(".team-right span.team-template-text").text().trim() ||
+        $(element).find(".team-right").text().trim()
+      let team1fullName
+      let team2fullName
+      try {
+        team1fullName =
+          $(element).find(".team-left span").attr("data-highlightingclass") ||
+          null
+        team2fullName =
+          $(element).find(".team-right span").attr("data-highlightingclass") ||
+          null
+      } catch {}
 
-      if (ignoreTbd) {
-        if (team1 === "TBD" || team2 === "TBD") return
+      if (!team1 || !team2) {
+        if (shouldVerbose) console.log("Ignoring match with missing teams")
+        return
+      }
+
+      if (ignoreTbd && team1 === "TBD" && team2 === "TBD") {
+        if (shouldVerbose) console.log("Ignoring match with TBD team")
+        return
       }
 
       // OLD WAY OF OBTAINING COMPETITION, DOES NOT WORK FOR ALL GAMES
@@ -73,14 +113,33 @@ async function fetchMatches(url, competitionRegex, teamsRegex, opts) {
       let competition = $(element).find(".match-filler")
       competition.find(".match-countdown").remove()
       competition = competition.text().trim()
-      let competitionSubPart
+      let descriptor
+      let descriptorMoreInfo
       try {
-        competitionSubPart =
-          $(element).find(".versus abbr").attr("title") || null
+        const versus = $(element).find(".versus")
+        if (
+          // has score
+          $(versus)
+            .text()
+            .trim()
+            .match(/[0-9]+\:[0-9]+/)
+        ) {
+          descriptor = $(versus).text().trim()
+        } else {
+          descriptor =
+            $(element).find(".versus abbr").text() ||
+            $(element).find(".versus abbr").html() ||
+            $(element).find(".versus abbr").attr("title") ||
+            null
+          descriptorMoreInfo =
+            $(element).find(".versus abbr").attr("title") || null
+        }
       } catch (error) {
         // ignore missing competition subpart
       }
 
+      if (team1 === "TBD") team1 = "???"
+      if (team2 === "TBD") team2 = "???"
       const eventData = {
         uid:
           `${competition.replace(
@@ -91,21 +150,42 @@ async function fetchMatches(url, competitionRegex, teamsRegex, opts) {
         dateTimestamp,
         team1,
         team2,
+        team1fullName,
+        team2fullName,
         competition,
         summary:
-          `${team1} vs ${team2} [${competition}]` +
-          (competitionSubPart ? ` [${competitionSubPart}]` : ""),
+          `${team1} vs ${team2} ` +
+          (descriptor ? `(${descriptor}) ` : "") +
+          `[${competition}]`,
+        description: `${team1fullName || team1} vs ${team2fullName || team2} ${
+          descriptor
+            ? "(" + (descriptorMoreInfo || descriptor || "") + ") "
+            : ""
+        }[${competition}]`,
       }
 
       const competitionOk = competitionMatches(eventData, competitionRegex)
-      const teamsOk = teamsMatches(eventData, teamsRegex)
+      const teamsOk = teamsRegexUseFullnames
+        ? teamsFullnameMatches(eventData, teamsRegex)
+        : teamsMatches(eventData, teamsRegex)
 
+      const logMessage = `eventData=${JSON.stringify(
+        eventData
+      )} opts=${JSON.stringify(opts)}`
       // if condition is OR, need at least one to be true
-      if (conditionIsOr && !competitionOk && !teamsOk) return
+      if (conditionIsOr && !competitionOk && !teamsOk) {
+        if (shouldVerbose)
+          console.log(`Ignoring match due to filter conditions ${logMessage}`)
+        return
+      }
       // if condition is AND, need both to be true
-      if (!conditionIsOr && (!competitionOk || !teamsOk)) return
+      if (!conditionIsOr && (!competitionOk || !teamsOk)) {
+        if (shouldVerbose)
+          console.log(`Ignoring match due to filter conditions ${logMessage}`)
+        return
+      }
       events.push(eventData)
-      if (VERBOSE) console.log({ eventData })
+      if (shouldVerbose) console.log({ eventData })
     })
 
     // display all opts as \t separated string
@@ -130,11 +210,17 @@ async function fetchMatches(url, competitionRegex, teamsRegex, opts) {
 // desiredFormat: YYYYMMDD'T'HHmmss'Z'
 const timestampToIcs = (timestamp) => {
   const date = new Date(timestamp * 1000)
+
   // produce YYYYMMDD
   const datePart = date.toISOString().split("T")[0].replace(/-/g, "")
 
   // produce HHmmss
-  const timePart = date.toTimeString().split(" ")[0].replace(/:/g, "")
+  const timePart = date
+    .toISOString()
+    .split("T")[1]
+    .replace(/:/g, "")
+    .replace(/\.[0-9]+/, "")
+
   return `${datePart}T${timePart}`
 }
 
@@ -145,25 +231,7 @@ const buildCalendar = (events) => {
   VERSION:2.0
   PRODID:-//com.snwfdhmp.liquipedia-calendar//NONSGML v1.0//EN
   CALSCALE:GREGORIAN
-  METHOD:PUBLISH
-  BEGIN:VTIMEZONE
-  TZID:Europe/Paris
-  X-LIC-LOCATION:Europe/Paris
-  BEGIN:DAYLIGHT
-  TZOFFSETFROM:+0100
-  TZOFFSETTO:+0200
-  TZNAME:CEST
-  DTSTART:20230326T020000
-  RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
-  END:DAYLIGHT
-  BEGIN:STANDARD
-  TZOFFSETFROM:+0200
-  TZOFFSETTO:+0100
-  TZNAME:CET
-  DTSTART:20231029T030000
-  RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
-  END:STANDARD
-  END:VTIMEZONE`
+  METHOD:PUBLISH`
     .split("\n")
     .map((line) => line.trim())
     .join("\n")
@@ -172,17 +240,17 @@ const buildCalendar = (events) => {
 
   const body = events
     .map((event) =>
-      `BEGIN:VEVENT
-      UID:${event.uid}
-      DTSTAMP;TZID=Europe/Paris:${timestampToIcs(event.dateTimestamp)}
-      DTSTART;TZID=Europe/Paris:${timestampToIcs(event.dateTimestamp)}
-      DURATION: PT1H
-      SUMMARY:${event.summary}
-      END:VEVENT
-    `
-        .split("\n")
-        .map((line) => line.trim())
-        .join("\n")
+      [
+        `BEGIN:VEVENT`,
+        `UID:${event.uid}`,
+        `LOCATION:${event.competition}`,
+        `DTSTAMP:${timestampToIcs(event.dateTimestamp)}`,
+        `DTSTART:${timestampToIcs(event.dateTimestamp)}`,
+        `DURATION:PT40M`,
+        `DESCRIPTION:${event.description.split("\n").join("\\n")}`,
+        `SUMMARY:${event.summary}`,
+        `END:VEVENT`,
+      ].join("\n")
     )
     .join("\n\n")
 
@@ -206,17 +274,23 @@ app.use((req, res, next) => {
   next()
 })
 app.get("/", (req, res) => {
-  res.send("com.snwfdhmp.liquipedia-calendar")
+  const __dirname = import.meta.url
+    .replace("file://", "")
+    .split("/")
+    .slice(0, -1)
+    .join("/")
+  res.sendFile(__dirname + "/url_builder.html")
 })
 app.get("/matches.ics", async (req, res) => {
   // read url, competition_regex and teams_regex from query params
-  if (VERBOSE) console.log({ query: req.query })
   const {
     url,
     competition_regex: competitionRegex,
     teams_regex: teamsRegex,
+    teams_regex_use_fullnames: teamsRegexUseFullnames,
     condition_is_or: conditionIsOr,
     ignore_tbd: ignoreTbd,
+    verbose: shouldVerbose,
   } = req.query
 
   if (!url) {
@@ -231,9 +305,13 @@ app.get("/matches.ics", async (req, res) => {
 
   try {
     const ics = buildCalendar(
-      await fetchMatches(url, competitionRegex, teamsRegex, {
+      await fetchMatches(url, {
+        competitionRegex,
+        teamsRegex,
+        teamsRegexUseFullnames,
         conditionIsOr,
         ignoreTbd,
+        shouldVerbose,
       })
     )
     res.setHeader("Content-Type", "text/calendar; charset=utf-8")
