@@ -1,6 +1,6 @@
 # Liquipedia to iCal
 
-[![Liquipedia to iCal](https://i.imgur.com/GgW2kgA.png)](https://ics.snwfdhmp.com)
+[![Liquipedia to iCal](https://i.imgur.com/aBfBPuN.png)](https://ics.snwfdhmp.com)
 
 ![Example Calendar Event](https://i.imgur.com/LYT2wIt.png)
 
