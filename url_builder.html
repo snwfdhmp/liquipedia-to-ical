@@ -36,6 +36,7 @@
             const ignoreTbd = document.getElementById("ignore_tbd").checked;
             const conditionIsOr = document.getElementById("condition_is_or").checked;
             const teamsRegexUseFullnames = document.getElementById("teams_regex_use_fullnames").checked;
+            const matchBothTeams = document.getElementById("match_both_teams").checked;
 
             let params = new URLSearchParams();
             params.append("url", url);
@@ -44,6 +45,7 @@
             if (ignoreTbd) params.append("ignore_tbd", "true");
             if (conditionIsOr) params.append("condition_is_or", "true");
             if (teamsRegexUseFullnames) params.append("teams_regex_use_fullnames", "true");
+            if (matchBothTeams) params.append("match_both_teams", "true");
 
             const finalUrl = `${baseUrl}?${params.toString()}`;
             document.getElementById("result").href = finalUrl;
@@ -153,6 +155,9 @@
 
         <input type="checkbox" id="teams_regex_use_fullnames">
         <label for="teams_regex_use_fullnames">Use team's fullnames for search (ie. "Karmine Corp" instead of "KC")</label><br><br>
+
+        <input type="checkbox" id="match_both_teams">
+        <label for="match_both_teams">Match only if both teams match the regex</label><br><br>
 
         <input type="checkbox" id="condition_is_or">
         <label for="condition_is_or">Matches only need to validate one of "Competition" or "Teams" regex to be added</label><br><br>

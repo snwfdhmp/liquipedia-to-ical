@@ -5,7 +5,8 @@
   "main": "index.js",
   "license": "MIT",
   "prettier": {
-    "semi": false
+    "semi": false,
+    "trailingComma": "all"
   },
   "dependencies": {
     "axios": "^1.7.7",

@@ -3,10 +3,11 @@ Description=com.snwfdhmp.liquipedia-cal
 After=network.target
 
 [Service]
-WorkingDirectory=/root
-ExecStart=/usr/local/bin/node /opt/github.com/snwfdhmp/liquipedia-cal/main.js -q
+WorkingDirectory=/opt/github.com/snwfdhmp/liquipedia-cal
+ExecStart=/usr/local/bin/node main.js -q
 Restart=on-failure
 RestartSec=10
+SyslogIdentifier=com.snwfdhmp.liquipedia-cal
 
 [Install]
 WantedBy=multi-user.target

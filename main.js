@@ -2,6 +2,8 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
 import express from "express"
+import fs from "fs"
+import crypto from "crypto"
 
 let VERBOSE = true
 
@@ -19,15 +21,27 @@ const competitionMatches = (event, regex) => {
 
 // const inputTeamsMatches = "^(KC|M8|VIT)$"
 // const inputTeamsMatches = ""
-const teamsMatches = (event, regex) => {
+const teamsMatches = (event, regex, matchBothTeams) => {
   if (!event.team1.match(regex) && !event.team2.match(regex)) return false
+  if (matchBothTeams) {
+    if (!event.team1.match(regex) || !event.team2.match(regex)) return false
+  }
   return true
 }
 
-const teamsFullnameMatches = (event, regex) => {
+const teamsFullnameMatches = (event, regex, matchBothTeams) => {
+  if (!event.team1fullName || !event.team2fullName) return false
   if (!event.team1fullName.match(regex) && !event.team2fullName.match(regex))
     return false
+  if (matchBothTeams) {
+    if (!event.team1fullName.match(regex) || !event.team2fullName.match(regex))
+      return false
+  }
   return true
+}
+
+const logOnlyVerbose = (verbose, data) => {
+  if (verbose) console.log(data)
 }
 
 // Fonction pour récupérer les matchs à venir de Rocket League
@@ -37,9 +51,11 @@ async function fetchMatches(url, opts) {
     teamsRegex = ``,
     teamsRegexUseFullnames = false,
     conditionIsOr = false,
+    matchBothTeams = false,
     ignoreTbd = false,
     shouldVerbose = false,
   } = opts || {}
+  logOnlyVerbose(shouldVerbose, `Fetching matches from ${url}`)
   try {
     // Fetch de la page
     const response = await axios.get(url)
@@ -70,7 +86,7 @@ async function fetchMatches(url, opts) {
       // }
       // Récupération des dates, équipes et nom de la compétition
       const dateTimestamp = parseInt(
-        $(element).find(".timer-object").attr("data-timestamp")
+        $(element).find(".timer-object").attr("data-timestamp"),
       )
 
       if (dateTimestamp < Date.now() / 1000 - 3600 * 2) {
@@ -95,12 +111,12 @@ async function fetchMatches(url, opts) {
       } catch {}
 
       if (!team1 || !team2) {
-        if (shouldVerbose) console.log("Ignoring match with missing teams")
+        logOnlyVerbose(shouldVerbose, "Ignoring match with missing teams")
         return
       }
 
       if (ignoreTbd && team1 === "TBD" && team2 === "TBD") {
-        if (shouldVerbose) console.log("Ignoring match with TBD team")
+        logOnlyVerbose(shouldVerbose, "Ignoring match with TBD team")
         return
       }
 
@@ -144,7 +160,7 @@ async function fetchMatches(url, opts) {
         uid:
           `${competition.replace(
             /[^a-zA-Z0-9\-]/g,
-            ""
+            "",
           )}/${dateTimestamp}/${team1}/${team2}` +
           "@liquipedia-calendar.snwfdhmp.com",
         dateTimestamp,
@@ -166,22 +182,31 @@ async function fetchMatches(url, opts) {
 
       const competitionOk = competitionMatches(eventData, competitionRegex)
       const teamsOk = teamsRegexUseFullnames
-        ? teamsFullnameMatches(eventData, teamsRegex)
-        : teamsMatches(eventData, teamsRegex)
+        ? teamsFullnameMatches(eventData, teamsRegex, matchBothTeams)
+        : teamsMatches(eventData, teamsRegex, matchBothTeams)
+
+      let shouldBeSelected = false
+      if (conditionIsOr) {
+        shouldBeSelected = competitionOk || teamsOk
+      } else {
+        shouldBeSelected = competitionOk && teamsOk
+      }
+
+      logOnlyVerbose(shouldVerbose, {
+        competition,
+        competitionOk,
+        team1,
+        team2,
+        teamsOk,
+        conditionIsOr,
+        shouldBeSelected,
+      })
 
       const logMessage = `eventData=${JSON.stringify(
-        eventData
+        eventData,
       )} opts=${JSON.stringify(opts)}`
-      // if condition is OR, need at least one to be true
-      if (conditionIsOr && !competitionOk && !teamsOk) {
-        if (shouldVerbose)
-          console.log(`Ignoring match due to filter conditions ${logMessage}`)
-        return
-      }
-      // if condition is AND, need both to be true
-      if (!conditionIsOr && (!competitionOk || !teamsOk)) {
-        if (shouldVerbose)
-          console.log(`Ignoring match due to filter conditions ${logMessage}`)
+      if (!shouldBeSelected) {
+        logOnlyVerbose(shouldVerbose, `Ignoring match: ${logMessage}`)
         return
       }
       events.push(eventData)
@@ -192,15 +217,23 @@ async function fetchMatches(url, opts) {
     console.log(
       `${
         events.length
-      } matches fetched from ${url}\tcompetition_regex=${competitionRegex}\tteams_regex=${teamsRegex}\t${Object.entries(
-        opts
+      } matches returned from ${url}\tcompetition_regex=${competitionRegex}\tteams_regex=${teamsRegex}\t${Object.entries(
+        opts,
       )
         .map(([key, value]) => `${key}=${value}`)
-        .join("\t")}`
+        .join("\t")}`,
     )
 
-    // Retourner les événements sous forme d'ICS
-    return events
+    // filter unique events
+    const uniqueEvents = []
+    const uids = new Set()
+    for (const event of events) {
+      if (uids.has(event.uid)) continue
+      uids.add(event.uid)
+      uniqueEvents.push(event)
+    }
+
+    return uniqueEvents
   } catch (error) {
     console.error("Erreur lors de la récupération des matchs:", error)
     throw error
@@ -250,11 +283,33 @@ const buildCalendar = (events) => {
         `DESCRIPTION:${event.description.split("\n").join("\\n")}`,
         `SUMMARY:${event.summary}`,
         `END:VEVENT`,
-      ].join("\n")
+      ].join("\n"),
     )
     .join("\n\n")
 
   return `${headers}\n\n${body}\n\n${footers}`
+}
+
+const logClient = async (ip, payload, headers) => {
+  // store {lastSeenAt, payload} in ./logs/clients/${payloadHash..8}.ip.json
+  const basePath = `${import.meta.dirname}/logs/clients/`
+  try {
+    await fs.promises.mkdir(basePath, { recursive: true })
+    const payloadHash = crypto
+      .createHash("sha256")
+      .update(JSON.stringify(payload))
+      .digest("hex")
+    const payloadHashShort = payloadHash.substr(0, 8)
+    const logPath = `${basePath}/${payloadHashShort}.${ip}.json`
+    const log = {
+      lastSeenAt: new Date().toISOString(),
+      payload,
+      headers,
+    }
+    await fs.promises.writeFile(logPath, JSON.stringify(log, null, 2))
+  } catch (error) {
+    console.error(`Error while logging client: ${error}`)
+  }
 }
 
 // todo: store events and set DTSTAMP when event discovered/updated
@@ -266,11 +321,11 @@ const app = express()
 // log requests
 app.use((req, res, next) => {
   const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress
-  console.log(
-    `${new Date().toISOString()}\t${ip.padEnd(15)} ${req.method} ${
-      req.url
-    }${JSON.stringify(req.query)}`
-  )
+  if (req.headers["user-agent"] !== "com.snwfdhmp.healthcheck") {
+    console.log(
+      `${ip.padEnd(15)} ${req.method} ${req.url} ${JSON.stringify(req.query)}`,
+    )
+  }
   next()
 })
 app.get("/", (req, res) => {
@@ -281,9 +336,10 @@ app.get("/", (req, res) => {
     .join("/")
   res.sendFile(__dirname + "/url_builder.html")
 })
+
 app.get("/matches.ics", async (req, res) => {
   // read url, competition_regex and teams_regex from query params
-  const {
+  let {
     url,
     competition_regex: competitionRegex,
     teams_regex: teamsRegex,
@@ -291,7 +347,20 @@ app.get("/matches.ics", async (req, res) => {
     condition_is_or: conditionIsOr,
     ignore_tbd: ignoreTbd,
     verbose: shouldVerbose,
+    match_both_teams: matchBothTeams,
   } = req.query
+
+  logClient(
+    req.headers["x-forwarded-for"] ||
+      req.connection.remoteAddress ||
+      "unknown-ip",
+    req.query,
+    req.headers,
+  )
+
+  if (typeof conditionIsOr === "string") {
+    conditionIsOr = conditionIsOr === "true"
+  }
 
   if (!url) {
     res.status(400).send("Missing url query param")
@@ -312,7 +381,8 @@ app.get("/matches.ics", async (req, res) => {
         conditionIsOr,
         ignoreTbd,
         shouldVerbose,
-      })
+        matchBothTeams,
+      }),
     )
     res.setHeader("Content-Type", "text/calendar; charset=utf-8")
     res.setHeader("Content-Disposition", "attachment; filename=calendar.ics")
