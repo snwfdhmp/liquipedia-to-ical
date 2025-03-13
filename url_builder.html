@@ -1,175 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Liquipedia to iCal URL Builder</title>
-    <meta name="description" content="Create a custom iCal URL for Liquipedia matches with optional filters for competitions and teams.">
-    <meta name="keywords" content="Liquipedia, iCal, calendar, esports, matches">
-    <meta name="author" content="snwfdhmp">
-    <meta property="og:title" content="Liquipedia to iCal URL Builder">
-    <meta property="og:description" content="Create a custom iCal URL for Liquipedia matches with optional filters for competitions and teams.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ics.snwfdhmp.com/">
-    <meta property="og:image" content="https://ics.snwfdhmp.com/og-image.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Liquipedia to iCal URL Builder">
-    <meta name="twitter:description" content="Create a custom iCal URL for Liquipedia matches with optional filters for competitions and teams.">
-    <meta name="twitter:image" content="https://ics.snwfdhmp.com/twitter-image.jpg">
-    <link rel="canonical" href="https://ics.snwfdhmp.com/">
+    <meta
+      name="description"
+      content="Create a custom iCal URL for Liquipedia matches with optional filters for competitions and teams."
+    />
+    <meta
+      name="keywords"
+      content="Liquipedia, iCal, calendar, esports, matches"
+    />
+    <meta name="author" content="snwfdhmp" />
+    <meta property="og:title" content="Liquipedia to iCal URL Builder" />
+    <meta
+      property="og:description"
+      content="Create a custom iCal URL for Liquipedia matches with optional filters for competitions and teams."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ics.snwfdhmp.com/" />
+    <meta property="og:image" content="https://ics.snwfdhmp.com/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Liquipedia to iCal URL Builder" />
+    <meta
+      name="twitter:description"
+      content="Create a custom iCal URL for Liquipedia matches with optional filters for competitions and teams."
+    />
+    <meta
+      name="twitter:image"
+      content="https://ics.snwfdhmp.com/twitter-image.jpg"
+    />
+    <link rel="canonical" href="https://ics.snwfdhmp.com/" />
     <script>
-        function buildUrl() {
-            const baseUrl = "https://ics.snwfdhmp.com/matches.ics";
-            const urlRadios = document.getElementsByName("url");
-            let url = "";
-            for (const radio of urlRadios) {
-                if (radio.checked) {
-                    url = radio.value;
-                    break;
-                }
-            }
-            if (url === "custom") {
-                url = document.getElementById("custom_url").value;
-            }
-            const competitionRegex = document.getElementById("competition_regex").value;
-            const teamsRegex = document.getElementById("teams_regex").value;
-            const ignoreTbd = document.getElementById("ignore_tbd").checked;
-            const conditionIsOr = document.getElementById("condition_is_or").checked;
-            const teamsRegexUseFullnames = document.getElementById("teams_regex_use_fullnames").checked;
-            const matchBothTeams = document.getElementById("match_both_teams").checked;
-
-            let params = new URLSearchParams();
-            params.append("url", url);
-            if (competitionRegex) params.append("competition_regex", competitionRegex);
-            if (teamsRegex) params.append("teams_regex", teamsRegex);
-            if (ignoreTbd) params.append("ignore_tbd", "true");
-            if (conditionIsOr) params.append("condition_is_or", "true");
-            if (teamsRegexUseFullnames) params.append("teams_regex_use_fullnames", "true");
-            if (matchBothTeams) params.append("match_both_teams", "true");
-
-            const finalUrl = `${baseUrl}?${params.toString()}`;
-            document.getElementById("result").href = finalUrl;
-            document.getElementById("result").textContent = finalUrl;
+      function displayResults(results) {
+        if (results.length === 0) {
+          displayNoResult()
+          return
         }
+        const list = document.getElementById("result-display-list")
+        list.innerHTML = "" // Clear existing items
 
-        function toggleCustomUrl() {
-            const customUrlInput = document.getElementById("custom_url");
-            customUrlInput.disabled = !document.getElementById("custom").checked;
-            if (document.getElementById("custom").checked) {
-                customUrlInput.focus();
-            }
+        results.forEach((result) => {
+          const li = document.createElement("li")
+          li.textContent = result
+          list.appendChild(li)
+        })
+      }
+
+      function displayNoResult() {
+        const list = document.getElementById("result-display-list")
+        list.innerHTML = ""
+        const span = document.createElement("span")
+        span.innerHTML = `<i>No matching events found</i><br/><a href="${getDesiredUrl()}" target="_blank">Check the Liquipedia page</a><br/><br/><br/><br/><i>After checking the <a href="${getDesiredUrl()}" target="_blank">Liquipedia page</a>, if you think this is a mistake on our side, please <a href='https://github.com/snwfdhmp/liquipedia-to-ical/issues' target='_blank'>open an issue on GitHub</a> or <a href='https://discord.com/app' target='_blank'>contact me on Discord (mjo___)</a>.`
+        list.appendChild(span)
+      }
+
+      function displaySpinner() {
+        const list = document.getElementById("result-display-list")
+        list.innerHTML = ""
+        const span = document.createElement("span")
+        const img = document.createElement("img")
+        img.src =
+          "https://i.pinimg.com/originals/2e/ce/ce/2ececec5431d0a1b7eae4e1acac7c59f.gif"
+        img.style.height = "20px"
+        span.appendChild(img)
+        list.appendChild(span)
+      }
+
+      function getDesiredUrl() {
+        const urlRadios = document.getElementsByName("url")
+        let url = ""
+        for (const radio of urlRadios) {
+          if (radio.checked) {
+            url = radio.value
+            break
+          }
         }
+        if (url === "custom") {
+          url = document.getElementById("custom_url").value
+        }
+        return url
+      }
 
-        // Add event listeners to all form inputs
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputs = document.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('input', buildUrl);
-            });
+      function buildUrl() {
+        const baseUrl = "https://ics.snwfdhmp.com/matches.ics"
+        const url = getDesiredUrl()
+        const competitionRegex =
+          document.getElementById("competition_regex").value
+        const teamsRegex = document.getElementById("teams_regex").value
+        const ignoreTbd = document.getElementById("ignore_tbd").checked
+        const conditionIsOr = document.getElementById("condition_is_or").checked
+        const teamsRegexUseFullnames = document.getElementById(
+          "teams_regex_use_fullnames",
+        ).checked
+        const matchBothTeams =
+          document.getElementById("match_both_teams").checked
+        const verbose = document.getElementById("verbose").checked
 
-            const urlRadios = document.getElementsByName("url");
-            urlRadios.forEach(radio => {
-                radio.addEventListener('change', toggleCustomUrl);
-            });
+        let params = new URLSearchParams()
+        params.append("url", url)
+        if (competitionRegex)
+          params.append("competition_regex", competitionRegex)
+        if (teamsRegex) params.append("teams_regex", teamsRegex)
+        if (ignoreTbd) params.append("ignore_tbd", "true")
+        if (conditionIsOr) params.append("condition_is_or", "true")
+        if (teamsRegexUseFullnames)
+          params.append("teams_regex_use_fullnames", "true")
+        if (matchBothTeams) params.append("match_both_teams", "true")
+        if (verbose) params.append("verbose", "true")
 
-            // Add click event listener to the result link
-            document.getElementById("result").addEventListener('click', function(e) {
-                e.preventDefault();
-                const url = this.href;
-                navigator.clipboard.writeText(url).then(() => {
-                    alert('URL copied to clipboard!');
-                }).catch(err => {
-                    console.error('Failed to copy URL: ', err);
-                });
-            });
+        const finalUrl = `${baseUrl}?${params.toString()}`
+        document.getElementById("result").href = finalUrl
+        document.getElementById("result").textContent = finalUrl
 
-            toggleCustomUrl();
-            buildUrl();
-        });
+        displaySpinner()
+        // Fetch the URL to validate it works
+        fetch(finalUrl)
+          .then(async (response) => {
+            if (!response.ok) {
+              console.error("Network response was not ok")
+              return
+            }
+            const results = quickEventsParse(await response.text())
+            console.log(results)
+            displayResults(results)
+          })
+          .catch((error) => {
+            console.error("Error fetching calendar:", error)
+          })
+      }
+
+      function quickEventsParse(icsText) {
+        const matches = icsText.match(/^[\s]*SUMMARY:(.*)$/gm)
+        if (!matches) return []
+        return matches.map((match) => match.replace(/^SUMMARY:/, ""))
+      }
+
+      function toggleCustomUrl() {
+        const customUrlInput = document.getElementById("custom_url")
+        customUrlInput.disabled = !document.getElementById("custom").checked
+        if (document.getElementById("custom").checked) {
+          customUrlInput.focus()
+        }
+      }
+
+      // Add event listeners to all form inputs
+      document.addEventListener("DOMContentLoaded", function () {
+        const inputs = document.querySelectorAll("input")
+        inputs.forEach((input) => {
+          input.addEventListener("input", buildUrl)
+        })
+
+        const urlRadios = document.getElementsByName("url")
+        urlRadios.forEach((radio) => {
+          radio.addEventListener("change", toggleCustomUrl)
+        })
+
+        // Add click event listener to the result link
+        document
+          .getElementById("result")
+          .addEventListener("click", function (e) {
+            e.preventDefault()
+            const url = this.href
+            navigator.clipboard
+              .writeText(url)
+              .then(() => {
+                alert("URL copied to clipboard!")
+              })
+              .catch((err) => {
+                console.error("Failed to copy URL: ", err)
+              })
+          })
+
+        toggleCustomUrl()
+        buildUrl()
+      })
     </script>
-</head>
-<style>
+  </head>
+  <style>
     body {
-        background-color: #F9F9F9;
-        font-family: "Arial";
+      background-color: #f9f9f9;
+      font-family: "Arial";
     }
     .container {
-        width: 48em;
-        margin: 2em auto 0;
-        background-color: #FFF;
-        padding: 2em;
-        border-radius: 32px;
-        position: relative;
+      width: 48em;
+      margin: 2em auto 0;
+      background-color: #fff;
+      padding: 2em;
+      border-radius: 32px;
+      position: relative;
     }
     .top-left {
-        position: fixed;
-        top: 0;
-        width: 100%;
-        margin: 0 auto;
-        text-align: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
     }
     .top-left a {
-        font-size: 0.8em;
-        color: #336;
-        text-decoration: underline;
-        cursor: pointer;
+      font-size: 0.8em;
+      color: #336;
+      text-decoration: underline;
+      cursor: pointer;
     }
     .top-left a:hover {
-        color: #33F;
-        cursor: pointer;
+      color: #33f;
+      cursor: pointer;
     }
-</style>
-<body>
+    .result-display-list {
+      font-family: "monospace";
+    }
+  </style>
+  <body>
     <div class="top-left">
-        <a href="https://github.com/snwfdhmp/liquipedia-to-ical" target="_blank">github.com/snwfdhmp/liquipedia-to-ical</a>
+      <a href="https://github.com/snwfdhmp/liquipedia-to-ical" target="_blank"
+        >github.com/snwfdhmp/liquipedia-to-ical</a
+      >
     </div>
     <div class="container">
-    <h1>Configure your iCal URL</h1>
-    <form>
+      <h1>Configure your iCal URL</h1>
+      <form>
         <p><b>Mandatory parameters</b></p>
-        <label>Game:</label><br>
-        <input type="radio" id="rocket_league" name="url" value="https://liquipedia.net/rocketleague/Liquipedia:Matches" checked>
-        <label for="rocket_league">Rocket League</label><br>
-        <input type="radio" id="league_of_legends" name="url" value="https://liquipedia.net/leagueoflegends/Liquipedia:Matches">
-        <label for="league_of_legends">League of Legends</label><br>
-        <input type="radio" id="trackmania" name="url" value="https://liquipedia.net/trackmania/Liquipedia:Matches">
-        <label for="trackmania">Trackmania</label><br>
-        <input type="radio" id="valorant" name="url" value="https://liquipedia.net/valorant/Liquipedia:Matches">
-        <label for="valorant">Valorant</label><br>
-        <input type="radio" id="cs" name="url" value="https://liquipedia.net/counterstrike/Liquipedia:Matches">
-        <label for="cs">Counter-Strike</label><br><input type="radio" id="cs" name="url" value="https://liquipedia.net/starcraft2/Liquipedia:Upcoming_and_ongoing_matches">
-        <label for="cs">Starcraft II</label><br>
-        <input type="radio" id="overwatch" name="url"
-            value="https://liquipedia.net/overwatch/Liquipedia:Upcoming_and_ongoing_matches">
-        <label for="overwatch">Overwatch</label><br>
-        <input type="radio" id="custom" name="url" value="custom">
+        <label>Game:</label><br />
+        <input
+          type="radio"
+          id="rocket_league"
+          name="url"
+          value="https://liquipedia.net/rocketleague/Liquipedia:Matches"
+          checked
+        />
+        <label for="rocket_league">Rocket League</label><br />
+        <input
+          type="radio"
+          id="league_of_legends"
+          name="url"
+          value="https://liquipedia.net/leagueoflegends/Liquipedia:Matches"
+        />
+        <label for="league_of_legends">League of Legends</label><br />
+        <input
+          type="radio"
+          id="trackmania"
+          name="url"
+          value="https://liquipedia.net/trackmania/Liquipedia:Matches"
+        />
+        <label for="trackmania">Trackmania</label><br />
+        <input
+          type="radio"
+          id="valorant"
+          name="url"
+          value="https://liquipedia.net/valorant/Liquipedia:Matches"
+        />
+        <label for="valorant">Valorant</label><br />
+        <input
+          type="radio"
+          id="cs"
+          name="url"
+          value="https://liquipedia.net/counterstrike/Liquipedia:Matches"
+        />
+        <label for="cs">Counter-Strike</label><br /><input
+          type="radio"
+          id="cs"
+          name="url"
+          value="https://liquipedia.net/starcraft2/Liquipedia:Upcoming_and_ongoing_matches"
+        />
+        <label for="cs">Starcraft II</label><br />
+        <input
+          type="radio"
+          id="overwatch"
+          name="url"
+          value="https://liquipedia.net/overwatch/Liquipedia:Upcoming_and_ongoing_matches"
+        />
+        <label for="overwatch">Overwatch</label><br />
+        <input type="radio" id="custom" name="url" value="custom" />
         <label for="custom">Custom URL:</label>
-        <input type="url" id="custom_url" placeholder="Enter custom Liquipedia URL" size="64" disabled><br><br>
+        <input
+          type="url"
+          id="custom_url"
+          placeholder="Enter custom Liquipedia URL"
+          size="64"
+          disabled
+        /><br /><br />
 
         <p><b>Optional parameters</b></p>
-        <label for="competition_regex">Competition name should match this:</label>
-        <input type="text" id="competition_regex" placeholder="eg: Worlds" size="16"><br><br>
+        <label for="competition_regex"
+          >Competition name should match this:</label
+        >
+        <input
+          type="text"
+          id="competition_regex"
+          placeholder="eg: Worlds"
+          size="16"
+        /><br /><br />
 
-        <label for="teams_regex">One of the teams name should match this:</label>
-        <input type="text" id="teams_regex" placeholder="eg: ^(KC|G2)$" size="16"><br><br>
+        <label for="teams_regex"
+          >One of the teams name should match this:</label
+        >
+        <input
+          type="text"
+          id="teams_regex"
+          placeholder="eg: ^(KC|G2)$"
+          size="16"
+        /><br /><br />
 
-        <input type="checkbox" id="teams_regex_use_fullnames">
-        <label for="teams_regex_use_fullnames">Use team's fullnames for search (ie. "Karmine Corp" instead of "KC")</label><br><br>
+        <input type="checkbox" id="teams_regex_use_fullnames" />
+        <label for="teams_regex_use_fullnames"
+          >Use team's fullnames for search (ie. "Karmine Corp" instead of
+          "KC")</label
+        ><br /><br />
 
-        <input type="checkbox" id="match_both_teams">
-        <label for="match_both_teams">Match only if both teams match the regex</label><br><br>
+        <input type="checkbox" id="match_both_teams" />
+        <label for="match_both_teams"
+          >Match only if both teams match the regex</label
+        ><br /><br />
 
-        <input type="checkbox" id="condition_is_or">
-        <label for="condition_is_or">Matches only need to validate one of "Competition" or "Teams" regex to be added</label><br><br>
+        <input type="checkbox" id="condition_is_or" />
+        <label for="condition_is_or"
+          >Matches only need to validate one of "Competition" or "Teams" regex
+          to be added</label
+        ><br /><br />
 
-        <input type="checkbox" id="ignore_tbd">
-        <label for="ignore_tbd">Ignore a match if both teams are "To Be Defined"</label><br><br>
-    </form>
+        <input type="checkbox" id="ignore_tbd" />
+        <label for="ignore_tbd"
+          >Ignore a match if both teams are "To Be Defined"</label
+        ><br /><br />
 
-    <h2>Your iCal URL:</h2>
-    <a id="result" href="#" target="_blank" style="word-break: break-all; 
-       white-space: pre-wrap; display: inline-block; max-width: 100%;"></a>
-    <p><span style="font-size: 0.8em;">(click to copy)</span></p>
+        <input type="checkbox" id="verbose" />
+        <label for="verbose"
+          >Debugger mode (don't check this, only useful for me)</label
+        ><br /><br />
+      </form>
+
+      <h2>Your iCal URL:</h2>
+      <p>
+        IMPORT THIS URL in your Calendar:
+        <span style="font-size: 0.8em">(click to copy)</span>
+        <a
+          id="result"
+          href="#"
+          target="_blank"
+          style="
+            word-break: break-all;
+            white-space: pre-wrap;
+            display: inline-block;
+            max-width: 100%;
+          "
+        ></a>
+      </p>
+      <p>
+        Tutorial for:
+        <a href="https://www.youtube.com/watch?v=xGOMsz22XTU" target="_blank"
+          >Google Calendar</a
+        >,
+        <a
+          href="https://support.microsoft.com/en-us/office/import-calendars-into-outlook-8e8364e1-400e-4c0f-a573-fe76b5a2d379"
+          target="_blank"
+          >Outlook</a
+        >,
+        <a
+          href="https://www.medportal.ca/public/help/google/calendar/import-a-calendar-by-url-on-iphone-ipad-ipod"
+          target="_blank"
+          >Apple Calendar</a
+        >.
+      </p>
+      <h4>Overview:</h4>
+      <ol id="result-display-list"></ol>
     </div>
-</body>
+  </body>
 </html>

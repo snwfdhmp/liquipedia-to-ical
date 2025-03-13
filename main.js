@@ -44,6 +44,14 @@ const logOnlyVerbose = (verbose, data) => {
   if (verbose) console.log(data)
 }
 
+const tryMultipleSelectors = ($, selectors) => {
+  for (const selector of selectors) {
+    const elements = $(selector)
+    if (elements.length > 0) return elements
+  }
+  return null
+}
+
 // Fonction pour récupérer les matchs à venir de Rocket League
 async function fetchMatches(url, opts) {
   const {
@@ -71,26 +79,29 @@ async function fetchMatches(url, opts) {
       // ".matches-list div:nth-child(2) div:nth-child(2) .infobox_matches_content",
       // first parent of .infobox_matches_content
       ".wikitable",
+      ".match",
     ]
 
-    let elements = null
-    for (const selector of containerSelectorsToTry) {
-      elements = $(selector)
-      if (elements.length > 0) break
-    }
+    let elements = tryMultipleSelectors($, containerSelectorsToTry)
+    if (!elements) elements = []
 
     // Sélection des éléments du tableau de matchs
     elements.each((index, element) => {
-      // if (shouldVerbose) {
-      //   console.log(`ELEMENT TEXT: ${$(element).text()}`)
-      // }
+      logOnlyVerbose(shouldVerbose, `ELEMENT TEXT: ${$(element).text()}`)
       // Récupération des dates, équipes et nom de la compétition
       const dateTimestamp = parseInt(
         $(element).find(".timer-object").attr("data-timestamp"),
       )
 
       if (dateTimestamp < Date.now() / 1000 - 3600 * 2) {
-        // if (shouldVerbose) console.log("Ignoring match too old")
+        logOnlyVerbose(
+          shouldVerbose,
+          `Ignoring match too old: ${dateTimestamp}`,
+        )
+        logOnlyVerbose(
+          shouldVerbose,
+          `Date as ISO UTC: ${new Date(dateTimestamp * 1000).toISOString()}`,
+        )
         return
       }
       let team1 =
@@ -127,8 +138,12 @@ async function fetchMatches(url, opts) {
       //   .trim()
 
       let competition = $(element).find(".match-filler")
-      competition.find(".match-countdown").remove()
-      competition = competition.text().trim()
+      if (competition.length !== 0) {
+        competition.find(".match-countdown").remove()
+        competition = competition.text().trim()
+      } else {
+        competition = $(element).find(".match-tournament").text().trim()
+      }
       let descriptor
       let descriptorMoreInfo
       try {
@@ -335,6 +350,21 @@ app.get("/", (req, res) => {
     .slice(0, -1)
     .join("/")
   res.sendFile(__dirname + "/url_builder.html")
+})
+
+app.get("/preset/:name", (req, res) => {
+  const presets = {
+    rlcs: "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&teams_regex=%5E%28KC%7CM8%7CVIT%7CFUR%7CFLCN%7CNRG%29%24&match_both_teams=true",
+    ["rocket-league"]: "https://ics.snwfdhmp.com/preset/rlcs",
+  }
+
+  // redirect to preset if exists
+  if (presets[req.params.name]) {
+    res.redirect(presets[req.params.name])
+    return
+  }
+
+  res.status(404).send("Preset not found")
 })
 
 app.get("/matches.ics", async (req, res) => {
