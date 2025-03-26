@@ -32,6 +32,10 @@
       content="https://ics.snwfdhmp.com/twitter-image.jpg"
     />
     <link rel="canonical" href="https://ics.snwfdhmp.com/" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap"
+      rel="stylesheet"
+    />
     <script>
       function displayResults(results) {
         if (results.length === 0) {
@@ -44,6 +48,8 @@
         results.forEach((result) => {
           const li = document.createElement("li")
           li.textContent = result
+          li.style.fontFamily = "monospace"
+          li.style.fontSize = "1.2em"
           list.appendChild(li)
         })
       }
@@ -52,7 +58,7 @@
         const list = document.getElementById("result-display-list")
         list.innerHTML = ""
         const span = document.createElement("span")
-        span.innerHTML = `<i>No matching events found</i><br/><a href="${getDesiredUrl()}" target="_blank">Check the Liquipedia page</a><br/><br/><br/><br/><i>After checking the <a href="${getDesiredUrl()}" target="_blank">Liquipedia page</a>, if you think this is a mistake on our side, please <a href='https://github.com/snwfdhmp/liquipedia-to-ical/issues' target='_blank'>open an issue on GitHub</a> or <a href='https://discord.com/app' target='_blank'>contact me on Discord (mjo___)</a>.`
+        span.innerHTML = `<i>No events matching your criterias has been found.</i><br/><a href="${getDesiredUrl()}" target="_blank">Check the Liquipedia page</a><br/><br/><br/><br/><i>After checking the <a href="${getDesiredUrl()}" target="_blank">Liquipedia page</a>, if you think this is a mistake on our side, please <a href='https://github.com/snwfdhmp/liquipedia-to-ical/issues' target='_blank'>open an issue on GitHub</a> or <a href='https://discord.com/app' target='_blank'>contact me on Discord (mjo___)</a>.`
         list.appendChild(span)
       }
 
@@ -122,7 +128,9 @@
               console.error("Network response was not ok")
               return
             }
-            const results = quickEventsParse(await response.text())
+            const text = await response.text()
+            console.log(text)
+            const results = quickEventsParse(text)
             console.log(results)
             displayResults(results)
           })
@@ -178,6 +186,12 @@
       })
     </script>
   </head>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+    rel="stylesheet"
+  />
   <style>
     body {
       background-color: #f9f9f9;
@@ -208,8 +222,8 @@
       color: #33f;
       cursor: pointer;
     }
-    .result-display-list {
-      font-family: "monospace";
+    .result-display-list > li {
+      font-family: "Roboto Mono" !important;
     }
   </style>
   <body>
@@ -219,10 +233,10 @@
       >
     </div>
     <div class="container">
-      <h1>Configure your iCal URL</h1>
+      <h1>Sync Liquipedia matches to your Calendar</h1>
+      <p>Works with Google, Apple, Outlook, and others.</
       <form>
-        <p><b>Mandatory parameters</b></p>
-        <label>Game:</label><br />
+        <p><h3>Select your game:</h3></p>
         <input
           type="radio"
           id="rocket_league"
@@ -282,7 +296,7 @@
           disabled
         /><br /><br />
 
-        <p><b>Optional parameters</b></p>
+        <p><h3>Optional parameters</h3></p>
         <label for="competition_regex"
           >Competition name should match this:</label
         >
@@ -299,25 +313,25 @@
         <input
           type="text"
           id="teams_regex"
-          placeholder="eg: ^(KC|G2)$"
+          placeholder="eg: KC|G2|VIT"
           size="16"
         /><br /><br />
 
         <input type="checkbox" id="teams_regex_use_fullnames" />
         <label for="teams_regex_use_fullnames"
-          >Use team's fullnames for search (ie. "Karmine Corp" instead of
-          "KC")</label
+          >Use team's <u>fullnames</u> for search (ie. "Karmine Corp" instead of
+          "KC"). If unchecked: <u>use shortnames (KC)</u></label
         ><br /><br />
 
         <input type="checkbox" id="match_both_teams" />
         <label for="match_both_teams"
-          >Match only if both teams match the regex</label
+          >Add event only if <u>both</u> teams validates the query. If unchecked:
+          <u>add if at least one team</u> validates the query</label
         ><br /><br />
 
         <input type="checkbox" id="condition_is_or" />
         <label for="condition_is_or"
-          >Matches only need to validate one of "Competition" or "Teams" regex
-          to be added</label
+          >Events only need to validate <u>at least one of</u> "Competition" or "Teams" query to be added. If unchecked: <u>requires both to match</u></label
         ><br /><br />
 
         <input type="checkbox" id="ignore_tbd" />

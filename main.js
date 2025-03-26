@@ -7,6 +7,21 @@ import crypto from "crypto"
 
 let VERBOSE = true
 
+const cache = {}
+const CACHE_TIMEOUT_MS = 1000 * 60
+const getCache = async (hash) => {
+  if (cache[hash] && cache[hash].expiresAt > Date.now()) {
+    return cache[hash].data
+  }
+  return null
+}
+const setCache = async (hash, data) => {
+  cache[hash] = {
+    data,
+    expiresAt: Date.now() + CACHE_TIMEOUT_MS,
+  }
+}
+
 // if -q is passed, disable verbose
 if (process.argv.includes("-q")) VERBOSE = false
 
@@ -15,26 +30,38 @@ if (process.argv.includes("-q")) VERBOSE = false
 
 // const inputCompetitionRegex = "^RLCS"
 const competitionMatches = (event, regex) => {
-  if (!event.competition.match(regex)) return false
+  const regexExtended = new RegExp(regex, "i")
+  if (!event.competition.match(regexExtended)) return false
   return true
 }
 
 // const inputTeamsMatches = "^(KC|M8|VIT)$"
 // const inputTeamsMatches = ""
 const teamsMatches = (event, regex, matchBothTeams) => {
-  if (!event.team1.match(regex) && !event.team2.match(regex)) return false
+  const regexExtended = new RegExp(regex, "i")
+  if (!event.team1.match(regexExtended) && !event.team2.match(regexExtended)) {
+    return false
+  }
   if (matchBothTeams) {
-    if (!event.team1.match(regex) || !event.team2.match(regex)) return false
+    if (!event.team1.match(regexExtended) || !event.team2.match(regexExtended))
+      return false
   }
   return true
 }
 
 const teamsFullnameMatches = (event, regex, matchBothTeams) => {
+  const regexExtended = new RegExp(regex, "i")
   if (!event.team1fullName || !event.team2fullName) return false
-  if (!event.team1fullName.match(regex) && !event.team2fullName.match(regex))
+  if (
+    !event.team1fullName.match(regexExtended) &&
+    !event.team2fullName.match(regexExtended)
+  )
     return false
   if (matchBothTeams) {
-    if (!event.team1fullName.match(regex) || !event.team2fullName.match(regex))
+    if (
+      !event.team1fullName.match(regexExtended) ||
+      !event.team2fullName.match(regexExtended)
+    )
       return false
   }
   return true
@@ -65,14 +92,10 @@ async function fetchMatches(url, opts) {
   } = opts || {}
   logOnlyVerbose(shouldVerbose, `Fetching matches from ${url}`)
   try {
-    // Fetch de la page
-    const response = await axios.get(url)
-
-    // Charger la réponse HTML dans cheerio
-    const $ = cheerio.load(response.data)
-
-    // Tableau pour stocker les événements
     const events = []
+
+    const response = await axios.get(url)
+    const $ = cheerio.load(response.data)
 
     // test if element exists
     const containerSelectorsToTry = [
@@ -273,19 +296,6 @@ const timestampToIcs = (timestamp) => {
 }
 
 const buildCalendar = (events) => {
-  // events = events.slice(0, 2)
-
-  const headers = `BEGIN:VCALENDAR
-  VERSION:2.0
-  PRODID:-//com.snwfdhmp.liquipedia-calendar//NONSGML v1.0//EN
-  CALSCALE:GREGORIAN
-  METHOD:PUBLISH`
-    .split("\n")
-    .map((line) => line.trim())
-    .join("\n")
-
-  const footers = `END:VCALENDAR`
-
   const body = events
     .map((event) =>
       [
@@ -302,7 +312,7 @@ const buildCalendar = (events) => {
     )
     .join("\n\n")
 
-  return `${headers}\n\n${body}\n\n${footers}`
+  return wrapIcs(body)
 }
 
 const logClient = async (ip, payload, headers) => {
@@ -327,6 +337,12 @@ const logClient = async (ip, payload, headers) => {
   }
 }
 
+const setHeadersForIcs = (res) => {
+  res.setHeader("Content-Type", "text/calendar; charset=utf-8")
+  res.setHeader("Content-Disposition", "attachment; filename=calendar.ics")
+  return res
+}
+
 // todo: store events and set DTSTAMP when event discovered/updated
 // const cal = buildCalendar(await fetchMatches())
 // console.log(cal)
@@ -343,6 +359,15 @@ app.use((req, res, next) => {
   }
   next()
 })
+
+app.use((req, res, next) => {
+  // CORS
+  res.setHeader("Access-Control-Allow-Origin", "*")
+  res.setHeader("Access-Control-Allow-Methods", "*")
+  res.setHeader("Access-Control-Allow-Headers", "*")
+  next()
+})
+
 app.get("/", (req, res) => {
   const __dirname = import.meta.url
     .replace("file://", "")
@@ -352,22 +377,73 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/url_builder.html")
 })
 
-app.get("/preset/:name", (req, res) => {
+const cachedRouter = express.Router()
+
+cachedRouter.use(async (req, res, next) => {
+  const cached = await getCache(req.originalUrl)
+  if (cached) {
+    console.log(`Serving cached response for ${req.originalUrl}`)
+    res.send(cached)
+    return
+  }
+  res.sendResponse = res.send
+  res.send = (body) => {
+    console.log(`Caching response for ${req.originalUrl}`)
+    setCache(req.originalUrl, body)
+    res.sendResponse(body)
+  }
+  next()
+})
+
+cachedRouter.get("/preset/:name", async (req, res) => {
   const presets = {
-    rlcs: "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&teams_regex=%5E%28KC%7CM8%7CVIT%7CFUR%7CFLCN%7CNRG%29%24&match_both_teams=true",
-    ["rocket-league"]: "https://ics.snwfdhmp.com/preset/rlcs",
+    rlcs: [
+      "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&competition_regex=RLCS",
+    ],
+    "rlcs-worlds": [
+      "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&competition_regex=RLCS.*Worlds",
+    ],
+    "rlcs-major": [
+      "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&competition_regex=RLCS.*Major",
+    ],
+    "rlcs-fifae": [
+      "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&competition_regex=FIFA",
+    ],
+    "rlcs-enjoyer": [
+      "https://ics.snwfdhmp.com/preset/rlcs-major",
+      "https://ics.snwfdhmp.com/preset/rlcs-worlds",
+      "https://ics.snwfdhmp.com/preset/rlcs-fifae",
+      "https://ics.snwfdhmp.com/preset/rlcs-match-s-tier",
+    ],
+    "rlcs-match-s-tier": [
+      "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&teams_regex=%5E%28KC%7CVIT%7CFUR%7CFLCN%7CM8%7CNRG%7CTWIS%7CTS%29%24&match_both_teams=true",
+    ],
+    "rocket-league": "https://ics.snwfdhmp.com/preset/rlcs",
   }
 
   // redirect to preset if exists
-  if (presets[req.params.name]) {
-    res.redirect(presets[req.params.name])
+  if (!presets[req.params.name]) {
+    res.status(404).send("Preset not found")
     return
   }
 
-  res.status(404).send("Preset not found")
+  let presetUrls = presets[req.params.name]
+  if (!Array.isArray(presetUrls)) {
+    presetUrls = [presetUrls]
+  }
+
+  let ics = ""
+  for (const presetUrl of presetUrls) {
+    const result = await axios.get(presetUrl)
+    ics = mergeIcs(ics, result.data)
+  }
+
+  // res.redirect(presets[req.params.name])
+  res = setHeadersForIcs(res)
+  res.send(ics)
 })
 
-app.get("/matches.ics", async (req, res) => {
+cachedRouter.get("/matches.ics", async (req, res) => {
   // read url, competition_regex and teams_regex from query params
   let {
     url,
@@ -414,13 +490,66 @@ app.get("/matches.ics", async (req, res) => {
         matchBothTeams,
       }),
     )
-    res.setHeader("Content-Type", "text/calendar; charset=utf-8")
-    res.setHeader("Content-Disposition", "attachment; filename=calendar.ics")
+    res = setHeadersForIcs(res)
     res.send(ics)
   } catch (error) {
     res.status(500).send("Erreur lors de la récupération des matchs")
   }
 })
+
+const icsWrappers = {
+  before: [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//com.snwfdhmp.liquipedia-calendar//NONSGML v1.0//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+  ],
+  after: ["END:VCALENDAR"],
+}
+
+const wrapIcs = (ics) => {
+  return [...icsWrappers.before, ics, ...icsWrappers.after].join("\n")
+}
+
+const unwrapIcs = (ics) => {
+  const lines = ics.split("\n")
+  const filteredLines = lines.filter(
+    (line) =>
+      ![
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//com.snwfdhmp.liquipedia-calendar//NONSGML v1.0//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "END:VCALENDAR",
+      ].includes(line),
+  )
+  return filteredLines.join("\n").trim()
+}
+
+const mergeIcs = (ics1, ics2) => {
+  const mergedIcs = wrapIcs([unwrapIcs(ics1), unwrapIcs(ics2)].join("\n"))
+  // remove duplicates
+
+  const events = mergedIcs.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g)
+  if (!events) return wrapIcs(mergedIcs)
+
+  const uids = new Set()
+  const uniqueEvents = events.filter((event) => {
+    const uid = event.match(/UID:(.*)/)[1]
+    if (uids.has(uid)) {
+      console.log(`Ignoring duplicate event with UID: ${uid}`)
+      return false
+    }
+    uids.add(uid)
+    return true
+  })
+
+  return wrapIcs(uniqueEvents.join("\n\n"))
+}
+
+app.use(cachedRouter)
 
 const PORT = process.env.PORT || 9059
 app.listen(PORT, () => {
