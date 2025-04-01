@@ -1,9 +1,9 @@
 # Liquipedia to iCal URL
 
-<img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="50%">
+<img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="70%">
 
 <a href="https://ics.snwfdhmp.com">
-  <img src="https://i.ibb.co/sdpwfTMv/image.png" alt="Liquipedia to iCal" width="80%">
+  <img src="https://i.ibb.co/sdpwfTMv/image.png" alt="Liquipedia to iCal" width="70%">
 </a>
 
 - Sync Liquipedia matches to your Calendar.
