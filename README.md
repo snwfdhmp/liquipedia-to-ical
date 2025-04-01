@@ -1,8 +1,8 @@
 # Liquipedia to iCal URL
 
-[![Liquipedia to iCal](https://i.ibb.co/sdpwfTMv/image.png)](https://ics.snwfdhmp.com)
+[![Liquipedia to iCal](https://i.ibb.co/sdpwfTMv/image.png | width=100)](https://ics.snwfdhmp.com)
 
-![Example Calendar Event](https://i.imgur.com/LYT2wIt.png)
+![Example Calendar Event](https://i.imgur.com/LYT2wIt.png | width=100)
 
 - Sync Liquipedia matches to your Calendar.
 - Events are refreshed when the iCal URL is re-fetched by your Calendar. (generally every 15 minutes)
