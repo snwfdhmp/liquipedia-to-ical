@@ -5,10 +5,8 @@ import express from "express"
 import fs from "fs"
 import crypto from "crypto"
 
-let VERBOSE = true
-
 const cache = {}
-const CACHE_TIMEOUT_MS = 1000 * 60
+const CACHE_TIMEOUT_MS = 1000 * 299
 const getCache = async (hash) => {
   if (cache[hash] && cache[hash].expiresAt > Date.now()) {
     return cache[hash].data
@@ -22,21 +20,12 @@ const setCache = async (hash, data) => {
   }
 }
 
-// if -q is passed, disable verbose
-if (process.argv.includes("-q")) VERBOSE = false
-
-// URL à fetch
-// const url = "https://liquipedia.net/rocketleague/Liquipedia:Matches"
-
-// const inputCompetitionRegex = "^RLCS"
 const competitionMatches = (event, regex) => {
   const regexExtended = new RegExp(regex, "i")
   if (!event.competition.match(regexExtended)) return false
   return true
 }
 
-// const inputTeamsMatches = "^(KC|M8|VIT)$"
-// const inputTeamsMatches = ""
 const teamsMatches = (event, regex, matchBothTeams) => {
   const regexExtended = new RegExp(regex, "i")
   if (!event.team1.match(regexExtended) && !event.team2.match(regexExtended)) {
@@ -67,8 +56,8 @@ const teamsFullnameMatches = (event, regex, matchBothTeams) => {
   return true
 }
 
-const logOnlyVerbose = (verbose, data) => {
-  if (verbose) console.log(data)
+const verbose = (shouldVerbose, data) => {
+  if (shouldVerbose) console.log(data)
 }
 
 const tryMultipleSelectors = ($, selectors) => {
@@ -90,49 +79,42 @@ async function fetchMatches(url, opts) {
     ignoreTbd = false,
     shouldVerbose = false,
   } = opts || {}
-  logOnlyVerbose(shouldVerbose, `Fetching matches from ${url}`)
+  verbose(shouldVerbose, `Fetching matches from ${url}`)
   try {
     const events = []
 
-    const response = await axios.get(url)
-    const $ = cheerio.load(response.data)
+    const $ = cheerio.load((await axios.get(url)).data)
 
-    // test if element exists
-    const containerSelectorsToTry = [
-      // ".matches-list div:nth-child(2) div:nth-child(2) .infobox_matches_content",
-      // first parent of .infobox_matches_content
-      ".wikitable",
-      ".match",
-    ]
-
-    let elements = tryMultipleSelectors($, containerSelectorsToTry)
+    // the different selectors to try, depends on page layout
+    const matchSelectorsToTry = [".wikitable", ".match"]
+    let elements = tryMultipleSelectors($, matchSelectorsToTry) || []
     if (!elements) elements = []
 
-    // Sélection des éléments du tableau de matchs
+    // ================ FOR EACH MATCH ================
     elements.each((index, element) => {
-      logOnlyVerbose(shouldVerbose, `ELEMENT TEXT: ${$(element).text()}`)
-      // Récupération des dates, équipes et nom de la compétition
+      verbose(shouldVerbose, `ELEMENT TEXT: ${$(element).text()}`)
+
+      // ================ DATE ================
       const dateTimestamp = parseInt(
         $(element).find(".timer-object").attr("data-timestamp"),
       )
-
       if (dateTimestamp < Date.now() / 1000 - 3600 * 2) {
-        logOnlyVerbose(
+        verbose(
           shouldVerbose,
-          `Ignoring match too old: ${dateTimestamp}`,
-        )
-        logOnlyVerbose(
-          shouldVerbose,
-          `Date as ISO UTC: ${new Date(dateTimestamp * 1000).toISOString()}`,
+          `Ignoring match too old: ${dateTimestamp}\n` +
+            `Date as ISO UTC: ${new Date(dateTimestamp * 1000).toISOString()}`,
         )
         return
       }
+
+      // ================ TEAM NAMES ================
       let team1 =
         $(element).find(".team-left span.team-template-text").text().trim() ||
         $(element).find(".team-left").text().trim()
       let team2 =
         $(element).find(".team-right span.team-template-text").text().trim() ||
         $(element).find(".team-right").text().trim()
+
       let team1fullName
       let team2fullName
       try {
@@ -143,23 +125,25 @@ async function fetchMatches(url, opts) {
           $(element).find(".team-right span").attr("data-highlightingclass") ||
           null
       } catch {}
-
       if (!team1 || !team2) {
-        logOnlyVerbose(shouldVerbose, "Ignoring match with missing teams")
+        verbose(shouldVerbose, "Ignoring match with missing teams")
         return
       }
-
       if (ignoreTbd && team1 === "TBD" && team2 === "TBD") {
-        logOnlyVerbose(shouldVerbose, "Ignoring match with TBD team")
+        verbose(shouldVerbose, "Ignoring match with TBD team")
         return
       }
+      if (team1 === "TBD") team1 = "???"
+      if (team2 === "TBD") team2 = "???"
+      if (team1fullName === "TBD") team1fullName = "??? (to be determined)"
+      if (team2fullName === "TBD") team2fullName = "??? (to be determined)"
 
+      // ================ MATCH DESCRIPTORS ================
       // OLD WAY OF OBTAINING COMPETITION, DOES NOT WORK FOR ALL GAMES
       // const competition = $(element)
       //   .find(".match-filler tbody tr td:nth-child(2)")
       //   .text()
       //   .trim()
-
       let competition = $(element).find(".match-filler")
       if (competition.length !== 0) {
         competition.find(".match-countdown").remove()
@@ -188,12 +172,22 @@ async function fetchMatches(url, opts) {
           descriptorMoreInfo =
             $(element).find(".versus abbr").attr("title") || null
         }
-      } catch (error) {
-        // ignore missing competition subpart
-      }
+      } catch {}
 
-      if (team1 === "TBD") team1 = "???"
-      if (team2 === "TBD") team2 = "???"
+      // ================ COMPILE EVENT DATA ================
+      let summary =
+        `${team1} vs ${team2} ` +
+        (descriptor && dateTimestamp > Date.now() / 1000
+          ? `(${descriptor}) `
+          : "") +
+        `[${competition}]`
+
+      let description = `${team1fullName || team1} vs ${
+        team2fullName || team2
+      } ${
+        descriptor ? "(" + (descriptorMoreInfo || descriptor || "") + ") " : ""
+      }[${competition}]`
+
       const eventData = {
         uid:
           `${competition.replace(
@@ -207,17 +201,11 @@ async function fetchMatches(url, opts) {
         team1fullName,
         team2fullName,
         competition,
-        summary:
-          `${team1} vs ${team2} ` +
-          (descriptor ? `(${descriptor}) ` : "") +
-          `[${competition}]`,
-        description: `${team1fullName || team1} vs ${team2fullName || team2} ${
-          descriptor
-            ? "(" + (descriptorMoreInfo || descriptor || "") + ") "
-            : ""
-        }[${competition}]`,
+        summary,
+        description,
       }
 
+      // ================ CHECK IF EVENT SHOULD BE SELECTED ================
       const competitionOk = competitionMatches(eventData, competitionRegex)
       const teamsOk = teamsRegexUseFullnames
         ? teamsFullnameMatches(eventData, teamsRegex, matchBothTeams)
@@ -229,8 +217,7 @@ async function fetchMatches(url, opts) {
       } else {
         shouldBeSelected = competitionOk && teamsOk
       }
-
-      logOnlyVerbose(shouldVerbose, {
+      verbose(shouldVerbose, {
         competition,
         competitionOk,
         team1,
@@ -240,29 +227,15 @@ async function fetchMatches(url, opts) {
         shouldBeSelected,
       })
 
-      const logMessage = `eventData=${JSON.stringify(
-        eventData,
-      )} opts=${JSON.stringify(opts)}`
       if (!shouldBeSelected) {
-        logOnlyVerbose(shouldVerbose, `Ignoring match: ${logMessage}`)
+        verbose(shouldVerbose, `Ignoring match: ${JSON.stringify(eventData)}`)
         return
       }
       events.push(eventData)
       if (shouldVerbose) console.log({ eventData })
     })
 
-    // display all opts as \t separated string
-    console.log(
-      `${
-        events.length
-      } matches returned from ${url}\tcompetition_regex=${competitionRegex}\tteams_regex=${teamsRegex}\t${Object.entries(
-        opts,
-      )
-        .map(([key, value]) => `${key}=${value}`)
-        .join("\t")}`,
-    )
-
-    // filter unique events
+    // ================ FILTER UNIQUE EVENTS ================
     const uniqueEvents = []
     const uids = new Set()
     for (const event of events) {
@@ -271,6 +244,16 @@ async function fetchMatches(url, opts) {
       uniqueEvents.push(event)
     }
 
+    console.log(
+      `${
+        uniqueEvents.length
+      } matches returned from ${url}\tcompetition_regex=${competitionRegex}\tteams_regex=${teamsRegex}\t${Object.entries(
+        opts,
+      )
+        .map(([key, value]) => `${key}=${value}`)
+        .join("\t")}`,
+    )
+
     return uniqueEvents
   } catch (error) {
     console.error("Erreur lors de la récupération des matchs:", error)
@@ -278,7 +261,6 @@ async function fetchMatches(url, opts) {
   }
 }
 
-// desiredFormat: YYYYMMDD'T'HHmmss'Z'
 const timestampToIcs = (timestamp) => {
   const date = new Date(timestamp * 1000)
 
@@ -292,6 +274,7 @@ const timestampToIcs = (timestamp) => {
     .replace(/:/g, "")
     .replace(/\.[0-9]+/, "")
 
+  // desiredFormat: YYYYMMDDTHHmmssZ
   return `${datePart}T${timePart}`
 }
 
@@ -368,13 +351,22 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get("/", (req, res) => {
-  const __dirname = import.meta.url
+const getDirname = () => {
+  return import.meta.url
     .replace("file://", "")
     .split("/")
     .slice(0, -1)
     .join("/")
+}
+
+app.get("/", (req, res) => {
+  const __dirname = getDirname()
   res.sendFile(__dirname + "/url_builder.html")
+})
+
+app.get("/favicon.ico", (req, res) => {
+  const __dirname = getDirname()
+  res.sendFile(__dirname + "/favicon.ico")
 })
 
 const cachedRouter = express.Router()
@@ -466,6 +458,8 @@ cachedRouter.get("/matches.ics", async (req, res) => {
 
   if (typeof conditionIsOr === "string") {
     conditionIsOr = conditionIsOr === "true"
+  } else {
+    conditionIsOr = false
   }
 
   if (!url) {
@@ -551,7 +545,19 @@ const mergeIcs = (ics1, ics2) => {
 
 app.use(cachedRouter)
 
-const PORT = process.env.PORT || 9059
-app.listen(PORT, () => {
-  console.log(`Server started on 0.0.0.0:${PORT}`)
-})
+if (process.argv[2] === "test") {
+  const ics = buildCalendar(
+    await fetchMatches(
+      "https://liquipedia.net/rocketleague/Liquipedia:Matches",
+      {
+        competitionRegex: "RLCS.*Major",
+      },
+    ),
+  )
+  console.log(ics)
+} else {
+  const PORT = process.env.PORT || 9059
+  app.listen(PORT, () => {
+    console.log(`Server started on 0.0.0.0:${PORT}`)
+  })
+}

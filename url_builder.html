@@ -8,6 +8,7 @@
       name="description"
       content="Create a custom iCal URL for Liquipedia matches with optional filters for competitions and teams."
     />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <meta
       name="keywords"
       content="Liquipedia, iCal, calendar, esports, matches"
@@ -37,6 +38,8 @@
       rel="stylesheet"
     />
     <script>
+
+
       function displayResults(results) {
         if (results.length === 0) {
           displayNoResult()
@@ -118,6 +121,7 @@
 
         const finalUrl = `${baseUrl}?${params.toString()}`
         document.getElementById("result").href = finalUrl
+        document.getElementById("import-as-ical").href = finalUrl.replace("https", "webcal")
         document.getElementById("result").textContent = finalUrl
 
         displaySpinner()
@@ -225,6 +229,23 @@
     .result-display-list > li {
       font-family: "Roboto Mono" !important;
     }
+    #import-as-ical {
+      font-family: "Roboto Mono" !important;
+      border: 2px solid #c11;
+      color: #000;
+      background-color: #ffefef;
+      width: fit-content;
+      padding: 0.5em;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 300;
+      display: block;
+    }
+    #result {
+      font-family: "Roboto Mono" !important;
+      color: #333;
+      font-size: 0.8em;
+    }
   </style>
   <body>
     <div class="top-left">
@@ -234,9 +255,9 @@
     </div>
     <div class="container">
       <h1>Sync Liquipedia matches to your Calendar</h1>
-      <p>Works with Google, Apple, Outlook, and others.</
+      <p>Works with Google, Apple, Outlook, Windows, iOS, and others.</
       <form>
-        <p><h3>Select your game:</h3></p>
+        <p><h3>Step 1: Select your game</h3></p>
         <input
           type="radio"
           id="rocket_league"
@@ -286,6 +307,13 @@
           value="https://liquipedia.net/overwatch/Liquipedia:Upcoming_and_ongoing_matches"
         />
         <label for="overwatch">Overwatch</label><br />
+        <input
+          type="radio"
+          id="dota_2"
+          name="url"
+          value="https://liquipedia.net/dota2/Liquipedia:Matches"
+        />
+        <label for="dota_2">Dota 2</label><br />
         <input type="radio" id="custom" name="url" value="custom" />
         <label for="custom">Custom URL:</label>
         <input
@@ -296,7 +324,7 @@
           disabled
         /><br /><br />
 
-        <p><h3>Optional parameters</h3></p>
+        <p><h3>Step 2: Customize (optional)</h3></p>
         <label for="competition_regex"
           >Competition name should match this:</label
         >
@@ -336,7 +364,7 @@
 
         <input type="checkbox" id="ignore_tbd" />
         <label for="ignore_tbd"
-          >Ignore a match if both teams are "To Be Defined"</label
+          >Ignore a match if both teams are "To Be Defined (???)"</label
         ><br /><br />
 
         <input type="checkbox" id="verbose" />
@@ -344,11 +372,20 @@
           >Debugger mode (don't check this, only useful for me)</label
         ><br /><br />
       </form>
-
-      <h2>Your iCal URL:</h2>
+      <h3>One-click import ↴</h3>
       <p>
-        IMPORT THIS URL in your Calendar:
-        <span style="font-size: 0.8em">(click to copy)</span>
+        <a id="import-as-ical" href="#">📅 Add to Calendar</a>
+      </p>
+      <p id="android-warning" style="display: none; font-weight: bold;">Android does not support webcal, use manual import instead.</p>
+      <script>
+        // Check if user is on Android
+        if (/Android/i.test(navigator.userAgent)) {
+          document.getElementById("android-warning").style.display = "block";
+        }
+      </script>
+      <h3>Manual import</h3>
+      <p>
+        Import in your calendar as URL:
         <a
           id="result"
           href="#"
@@ -377,7 +414,8 @@
           >Apple Calendar</a
         >.
       </p>
-      <h4>Overview:</h4>
+      <br />
+      <h3>Result overview:</h3>
       <ol id="result-display-list"></ol>
     </div>
   </body>
