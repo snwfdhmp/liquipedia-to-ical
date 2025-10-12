@@ -60,10 +60,12 @@ const verbose = (shouldVerbose, data) => {
   if (shouldVerbose) console.log(data)
 }
 
-const tryMultipleSelectors = ($, selectors) => {
+const tryMultipleSelectors = (findFunc, selectors, shouldVerbose) => {
   for (const selector of selectors) {
-    const elements = $(selector)
-    if (elements.length > 0) return elements
+    const elements = findFunc(selector)
+    // verbose(shouldVerbose, `SELECTOR: ${selector}`)
+    // verbose(shouldVerbose, `ELEMENTS: ${elements}`)
+    if (elements?.length > 0) return elements
   }
   return null
 }
@@ -78,6 +80,7 @@ async function fetchMatches(url, opts) {
     matchBothTeams = false,
     ignoreTbd = false,
     shouldVerbose = false,
+    pastMatchAllowSeconds = 3600 * 2,
   } = opts || {}
   verbose(shouldVerbose, `Fetching matches from ${url}`)
   try {
@@ -86,8 +89,9 @@ async function fetchMatches(url, opts) {
     const $ = cheerio.load((await axios.get(url)).data)
 
     // the different selectors to try, depends on page layout
-    const matchSelectorsToTry = [".wikitable", ".match"]
-    let elements = tryMultipleSelectors($, matchSelectorsToTry) || []
+    const matchSelectorsToTry = [".wikitable", ".match", ".match-info"]
+    let elements =
+      tryMultipleSelectors($, matchSelectorsToTry, shouldVerbose) || []
     if (!elements) elements = []
 
     // ================ FOR EACH MATCH ================
@@ -98,7 +102,8 @@ async function fetchMatches(url, opts) {
       const dateTimestamp = parseInt(
         $(element).find(".timer-object").attr("data-timestamp"),
       )
-      if (dateTimestamp < Date.now() / 1000 - 3600 * 2) {
+      verbose(shouldVerbose, `DATE TIMESTAMP: ${dateTimestamp}`)
+      if (dateTimestamp < Date.now() / 1000 - pastMatchAllowSeconds) {
         verbose(
           shouldVerbose,
           `Ignoring match too old: ${dateTimestamp}\n` +
@@ -108,12 +113,28 @@ async function fetchMatches(url, opts) {
       }
 
       // ================ TEAM NAMES ================
-      let team1 =
-        $(element).find(".team-left span.team-template-text").text().trim() ||
-        $(element).find(".team-left").text().trim()
-      let team2 =
-        $(element).find(".team-right span.team-template-text").text().trim() ||
-        $(element).find(".team-right").text().trim()
+      let team1 = tryMultipleSelectors(
+        (selector) => $(element).find(selector),
+        [
+          ".team-left span.team-template-text",
+          ".match-info-header > div:nth-child(1)",
+        ],
+        shouldVerbose,
+      )
+        ?.text()
+        .trim()
+      verbose(shouldVerbose, `TEAM 1: ${team1}`)
+      let team2 = tryMultipleSelectors(
+        (selector) => $(element).find(selector),
+        [
+          ".team-right span.team-template-text",
+          ".match-info-header > div:nth-child(3)",
+        ],
+        shouldVerbose,
+      )
+        ?.text()
+        .trim()
+      verbose(shouldVerbose, `TEAM 2: ${team2}`)
 
       let team1fullName
       let team2fullName
@@ -125,6 +146,62 @@ async function fetchMatches(url, opts) {
           $(element).find(".team-right span").attr("data-highlightingclass") ||
           null
       } catch {}
+      let team1Logo
+      let team2Logo
+      try {
+        const team1ImgElement = $(element).find(
+          ".team-left .team-template-darkmode img",
+        )
+        const team2ImgElement = $(element).find(
+          ".team-right .team-template-darkmode img",
+        )
+
+        const searchImgInElement = (imgElement) => {
+          const imgList = [
+            imgElement.attr("src"),
+            ...imgElement
+              .attr("srcset")
+              ?.split(", ")
+              ?.map((src) => src?.split(" ")?.[0]),
+          ]
+          let bestImg = imgList?.[imgList.length - 1]
+          if (!bestImg) return null
+
+          if (bestImg.startsWith("/")) {
+            bestImg = "https://liquipedia.net" + bestImg
+          }
+          return bestImg
+        }
+
+        team1Logo = searchImgInElement(team1ImgElement)
+        team2Logo = searchImgInElement(team2ImgElement)
+      } catch {}
+
+      let team1Url
+      let team2Url
+      try {
+        team1Url = $(element)
+          .find(".team-left .team-template-darkmode a")
+          .attr("href")
+
+        if (team1Url && team1Url.startsWith("/")) {
+          team1Url = "https://liquipedia.net" + team1Url
+          if (team1Url.includes("redlink=1")) {
+            team1Url = null
+          }
+        }
+        team2Url = $(element)
+          .find(".team-right .team-template-darkmode a")
+          .attr("href")
+
+        if (team2Url && team2Url.startsWith("/")) {
+          team2Url = "https://liquipedia.net" + team2Url
+          if (team2Url.includes("redlink=1")) {
+            team2Url = null
+          }
+        }
+      } catch {}
+
       if (!team1 || !team2) {
         verbose(shouldVerbose, "Ignoring match with missing teams")
         return
@@ -174,6 +251,24 @@ async function fetchMatches(url, opts) {
         }
       } catch {}
 
+      let hasWinner = false
+      let winnerSide = ""
+      try {
+        const winnerLeft = $(element).hasClass("winner-left")
+        if (winnerLeft) {
+          hasWinner = true
+          winnerSide = "left"
+        }
+        const winnerRight = $(element).hasClass("winner-right")
+        if (winnerRight) {
+          hasWinner = true
+          winnerSide = "right"
+        }
+        console.log({ hasWinner, winnerSide, winnerLeft, winnerRight })
+      } catch (e) {
+        console.log(`Error while checking for winner: ${e}`)
+      }
+
       // ================ COMPILE EVENT DATA ================
       let summary =
         `${team1} vs ${team2} ` +
@@ -200,9 +295,16 @@ async function fetchMatches(url, opts) {
         team2,
         team1fullName,
         team2fullName,
+        team1Logo,
+        team2Logo,
         competition,
         summary,
         description,
+        winnerSide,
+        descriptor,
+        descriptorMoreInfo,
+        team1Url,
+        team2Url,
       }
 
       // ================ CHECK IF EVENT SHOULD BE SELECTED ================
@@ -279,6 +381,21 @@ const timestampToIcs = (timestamp) => {
 }
 
 const buildCalendar = (events) => {
+  const optionalData = {
+    "X-LIQUIPEDIATOICAL-COMPETITION": "competition",
+    "X-LIQUIPEDIATOICAL-TEAMLEFT": "team1",
+    "X-LIQUIPEDIATOICAL-TEAMLEFTFULLNAME": "team1fullName",
+    "X-LIQUIPEDIATOICAL-TEAMLEFTURL": "team1Url",
+    "X-LIQUIPEDIATOICAL-TEAMLEFTLOGO": "team1Logo",
+    "X-LIQUIPEDIATOICAL-TEAMRIGHT": "team2",
+    "X-LIQUIPEDIATOICAL-TEAMRIGHTFULLNAME": "team2fullName",
+    "X-LIQUIPEDIATOICAL-TEAMRIGHTURL": "team2Url",
+    "X-LIQUIPEDIATOICAL-TEAMRIGHTLOGO": "team2Logo",
+    "X-LIQUIPEDIATOICAL-WINNERSIDE": "winnerSide",
+    "X-LIQUIPEDIATOICAL-DESCRIPTOR": "descriptor",
+    "X-LIQUIPEDIATOICAL-DESCRIPTORMOREINFO": "descriptorMoreInfo",
+  }
+
   const body = events
     .map((event) =>
       [
@@ -290,6 +407,11 @@ const buildCalendar = (events) => {
         `DURATION:PT40M`,
         `DESCRIPTION:${event.description.split("\n").join("\\n")}`,
         `SUMMARY:${event.summary}`,
+        ...Object.entries(optionalData)
+          .map(([key, value]) =>
+            event[value] ? [`${key}:${event[value]}`] : null,
+          )
+          .filter(Boolean),
         `END:VEVENT`,
       ].join("\n"),
     )
@@ -380,8 +502,12 @@ cachedRouter.use(async (req, res, next) => {
   }
   res.sendResponse = res.send
   res.send = (body) => {
-    console.log(`Caching response for ${req.originalUrl}`)
-    setCache(req.originalUrl, body)
+    if (res.statusCode === 200) {
+      console.log(`Caching response for ${req.originalUrl}`)
+      setCache(req.originalUrl, body)
+    } else {
+      console.log(`Not caching response for ${req.originalUrl}`)
+    }
     res.sendResponse(body)
   }
   next()
@@ -389,6 +515,9 @@ cachedRouter.use(async (req, res, next) => {
 
 cachedRouter.get("/preset/:name", async (req, res) => {
   const presets = {
+    rocketbets: [
+      "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&competition_regex=RLCS&past_match_allow_seconds=2592000",
+    ],
     rlcs: [
       "https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&competition_regex=RLCS",
     ],
@@ -446,6 +575,7 @@ cachedRouter.get("/matches.ics", async (req, res) => {
     ignore_tbd: ignoreTbd,
     verbose: shouldVerbose,
     match_both_teams: matchBothTeams,
+    past_match_allow_seconds: pastMatchAllowSeconds,
   } = req.query
 
   logClient(
@@ -482,6 +612,7 @@ cachedRouter.get("/matches.ics", async (req, res) => {
         ignoreTbd,
         shouldVerbose,
         matchBothTeams,
+        pastMatchAllowSeconds,
       }),
     )
     res = setHeadersForIcs(res)
