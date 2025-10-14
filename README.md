@@ -104,6 +104,18 @@ Counter-Strike, all matches except "TBD" (unknown teams)
 | Starcraft 2       | ✅                       |
 | VALORANT          | ✅                       |
 | Overwatch         | ✅                       |
+| Dota 2            | ✅                       |
+| Mobile Legends    | ✅                       |
+| Rainbow Six       | ✅                       |
+| Age of Empires    | ✅                       |
+| Brawl Stars       | ✅                       |
+| EA Sports FC      | ✅                       |
+| Wild Rift         | ✅                       |
+| Heroes of the Storm | ✅                     |
+| Warcraft          | ✅                       |
+| Hearthstone       | ✅                       |
+| PUBG              | ✅                       |
+| Apex Legends      | ✅                       |
 | Other games       | Test yourself and report |
 
 Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
