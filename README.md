@@ -9,6 +9,33 @@
 - Sync Liquipedia matches to your Calendar.
 - Events are refreshed when the iCal URL is re-fetched by your Calendar application. (generally every 5 minutes)
 
+## Compatibility
+
+| Game              | Working                  |
+| ----------------- | ------------------------ |
+| Rocket League     | ✅ _Can get calendar events for Rocket League_                        |
+| League of Legends | ✅ _Can get calendar events for League of Legends_                        |
+| Trackmania        | ✅ _Can get calendar events for Trackmania_                        |
+| Counter-Strike    | ✅ _Can get calendar events for Counter-Strike_                        |
+| Starcraft 2       | ✅ _Can get calendar events for Starcraft 2_                        |
+| VALORANT          | ✅ _Can get calendar events for VALORANT_                        |
+| Overwatch         | ✅ _Can get calendar events for Overwatch_                        |
+| Dota 2            | ✅ _Can get calendar events for Dota 2_                        |
+| Mobile Legends    | ✅ _Can get calendar events for Mobile Legends_                        |
+| Rainbow Six       | ✅ _Can get calendar events for Rainbow Six_                        |
+| Age of Empires    | ✅ _Can get calendar events for Age of Empires_                        |
+| Brawl Stars       | ✅ _Can get calendar events for Brawl Stars_                        |
+| EA Sports FC      | ✅ _Can get calendar events for EA Sports FC_                        |
+| Wild Rift         | ✅ _Can get calendar events for Wild Rift_                        |
+| Heroes of the Storm | ✅ _Can get calendar events for Heroes of the Storm_                      |
+| Warcraft          | ✅ _Can get calendar events for Warcraft_                        |
+| Hearthstone       | ✅ _Can get calendar events for Hearthstone_                        |
+| PUBG              | ✅ _Can get calendar events for PUBG_                        |
+| Apex Legends      | ✅ _Can get calendar events for Apex Legends_                        |
+| Other games       | Test yourself and report |
+
+Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
+
 ## What is it ?
 
 I was tired of not having any simple way of adding esport matches to my calendar. Some apps tried to achieve that but none really achieved that simply and none integrates well into my workflow. So I build this.
@@ -93,32 +120,6 @@ Rocket League, Worlds matches + any match featuring KC or M8 or VIT or BDS or G2
 
 Counter-Strike, all matches except "TBD" (unknown teams)
 
-## Compatibility
-
-| Game              | Working                  |
-| ----------------- | ------------------------ |
-| Rocket League     | ✅ _Can get calendar events for Rocket League_                        |
-| League of Legends | ✅ _Can get calendar events for League of Legends_                        |
-| Trackmania        | ✅ _Can get calendar events for Trackmania_                        |
-| Counter-Strike    | ✅ _Can get calendar events for Counter-Strike_                        |
-| Starcraft 2       | ✅ _Can get calendar events for Starcraft 2_                        |
-| VALORANT          | ✅ _Can get calendar events for VALORANT_                        |
-| Overwatch         | ✅ _Can get calendar events for Overwatch_                        |
-| Dota 2            | ✅ _Can get calendar events for Dota 2_                        |
-| Mobile Legends    | ✅ _Can get calendar events for Mobile Legends_                        |
-| Rainbow Six       | ✅ _Can get calendar events for Rainbow Six_                        |
-| Age of Empires    | ✅ _Can get calendar events for Age of Empires_                        |
-| Brawl Stars       | ✅ _Can get calendar events for Brawl Stars_                        |
-| EA Sports FC      | ✅ _Can get calendar events for EA Sports FC_                        |
-| Wild Rift         | ✅ _Can get calendar events for Wild Rift_                        |
-| Heroes of the Storm | ✅ _Can get calendar events for Heroes of the Storm_                      |
-| Warcraft          | ✅ _Can get calendar events for Warcraft_                        |
-| Hearthstone       | ✅ _Can get calendar events for Hearthstone_                        |
-| PUBG              | ✅ _Can get calendar events for PUBG_                        |
-| Apex Legends      | ✅ _Can get calendar events for Apex Legends_                        |
-| Other games       | Test yourself and report |
-
-Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
 
 ## Contribute
 
