@@ -5,14 +5,25 @@
   "main": "index.js",
   "license": "MIT",
   "prettier": {
-    "semi": false,
-    "trailingComma": "all"
+    "semi": false
   },
   "dependencies": {
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
+    "dotenv": "^17.2.3",
     "express": "^4.21.0",
     "node-fetch": "2",
-    "puppeteer": "^23.3.0"
+    "puppeteer": "^23.3.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "dev": "tsx --watch src/main.ts"
   }
 }

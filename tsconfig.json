@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "target": "esnext",
+        "pretty": true,
+        "sourceMap": true,
+        "rootDir": "src",
+        "outDir": ".dist"
+    },
+    "include": [
+        "src/*.ts"
+    ]
+}
