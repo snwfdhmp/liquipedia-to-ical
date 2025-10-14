@@ -97,25 +97,25 @@ Counter-Strike, all matches except "TBD" (unknown teams)
 
 | Game              | Working                  |
 | ----------------- | ------------------------ |
-| Rocket League     | ✅                       |
-| League of Legends | ✅                       |
-| Trackmania        | ✅                       |
-| Counter-Strike    | ✅                       |
-| Starcraft 2       | ✅                       |
-| VALORANT          | ✅                       |
-| Overwatch         | ✅                       |
-| Dota 2            | ✅                       |
-| Mobile Legends    | ✅                       |
-| Rainbow Six       | ✅                       |
-| Age of Empires    | ✅                       |
-| Brawl Stars       | ✅                       |
-| EA Sports FC      | ✅                       |
-| Wild Rift         | ✅                       |
-| Heroes of the Storm | ✅                     |
-| Warcraft          | ✅                       |
-| Hearthstone       | ✅                       |
-| PUBG              | ✅                       |
-| Apex Legends      | ✅                       |
+| Rocket League     | ✅ _Can get calendar events for Rocket League_                        |
+| League of Legends | ✅ _Can get calendar events for League of Legends_                        |
+| Trackmania        | ✅ _Can get calendar events for Trackmania_                        |
+| Counter-Strike    | ✅ _Can get calendar events for Counter-Strike_                        |
+| Starcraft 2       | ✅ _Can get calendar events for Starcraft 2_                        |
+| VALORANT          | ✅ _Can get calendar events for VALORANT_                        |
+| Overwatch         | ✅ _Can get calendar events for Overwatch_                        |
+| Dota 2            | ✅ _Can get calendar events for Dota 2_                        |
+| Mobile Legends    | ✅ _Can get calendar events for Mobile Legends_                        |
+| Rainbow Six       | ✅ _Can get calendar events for Rainbow Six_                        |
+| Age of Empires    | ✅ _Can get calendar events for Age of Empires_                        |
+| Brawl Stars       | ✅ _Can get calendar events for Brawl Stars_                        |
+| EA Sports FC      | ✅ _Can get calendar events for EA Sports FC_                        |
+| Wild Rift         | ✅ _Can get calendar events for Wild Rift_                        |
+| Heroes of the Storm | ✅ _Can get calendar events for Heroes of the Storm_                      |
+| Warcraft          | ✅ _Can get calendar events for Warcraft_                        |
+| Hearthstone       | ✅ _Can get calendar events for Hearthstone_                        |
+| PUBG              | ✅ _Can get calendar events for PUBG_                        |
+| Apex Legends      | ✅ _Can get calendar events for Apex Legends_                        |
 | Other games       | Test yourself and report |
 
 Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
