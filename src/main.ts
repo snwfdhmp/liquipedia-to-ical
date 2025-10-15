@@ -6,6 +6,7 @@ import { presets } from "./presets.js"
 import { fetchMatches } from "./fetch.js"
 import { getCache, setCache } from "./cache.js"
 import { buildCalendar, mergeIcs } from "./ics.js"
+import { test } from "./test.js"
 
 const __dirname = new URL(".", import.meta.url).pathname
 
@@ -95,11 +96,13 @@ cachedRouter.use(async (req, res, next) => {
     } else {
       console.log(`Not caching response for ${req.originalUrl}`)
     }
-    updateTelemetry(req.telemetryId, {
-      http_status: res.statusCode,
-      from_cache: false,
-      spent_ms: Date.now() - req.timeStart,
-    })
+    if (!isFromPreset) {
+      updateTelemetry(req.telemetryId, {
+        http_status: res.statusCode,
+        from_cache: false,
+        spent_ms: Date.now() - req.timeStart,
+      })
+    }
     res.sendResponse(body)
   }
   next()
@@ -117,17 +120,14 @@ cachedRouter.get("/preset/:name", async (req: TelemetryRequest, res) => {
   }
 
   let presetUrls = presets[req.params.name]
-  if (!Array.isArray(presetUrls)) {
-    presetUrls = [presetUrls]
-  }
 
   let ics = ""
   for (const presetUrl of presetUrls) {
     try {
-      const result = await axios.get(
-        presetUrl +
-          `&is_from_admin=${req.query.is_from_admin}&is_from_preset=true`
-      )
+      const url = new URL(presetUrl)
+      url.searchParams.set("is_from_admin", req.query.is_from_admin as string)
+      url.searchParams.set("is_from_preset", "true")
+      const result = await axios.get(url.toString())
       ics = mergeIcs(ics, result.data)
     } catch (error) {
       console.error(`Error while fetching preset ${presetUrl}: ${error}`)
@@ -138,57 +138,88 @@ cachedRouter.get("/preset/:name", async (req: TelemetryRequest, res) => {
   res.send(ics)
 })
 
-cachedRouter.get("/matches.ics", async (req, res) => {
-  // read url, competition_regex and teams_regex from query params
-  let {
-    url,
-    competition_regex: competitionRegex,
-    teams_regex: teamsRegex,
-    teams_regex_use_fullnames: teamsRegexUseFullnames,
-    condition_is_or: conditionIsOr,
-    ignore_tbd: ignoreTbd,
-    verbose: shouldVerbose,
-    match_both_teams: matchBothTeams,
-    past_match_allow_seconds: pastMatchAllowSeconds,
-    expect_missing_teams: expectMissingTeams,
-  } = req.query
+const getOptsFromQuery = (
+  req: express.Request,
+  prefix: string = ""
+): ParserOptions => {
+  const from = {
+    url: "url",
+    competitionRegex: "competition_regex",
+    teamsRegex: "teams_regex",
+    teamsRegexUseFullnames: "teams_regex_use_fullnames",
+    conditionIsOr: "condition_is_or",
+    ignoreTbd: "ignore_tbd",
+    shouldVerbose: "verbose",
+    matchBothTeams: "match_both_teams",
+    pastMatchAllowSeconds: "past_match_allow_seconds",
+    expectMissingTeams: "expect_missing_teams",
+  }
 
-  if (typeof conditionIsOr === "string") {
-    conditionIsOr = conditionIsOr === "true"
+  const opts: ParserOptions = {}
+  for (const [key, value] of Object.entries(from)) {
+    opts[key] = req.query[prefix + value]
+  }
+
+  if (typeof opts.conditionIsOr === "string") {
+    opts.conditionIsOr = opts.conditionIsOr === "true"
   } else {
-    conditionIsOr = false
+    opts.conditionIsOr = false
   }
+  return opts
+}
 
-  if (!url) {
-    res.status(400).send("Missing url query param")
-    return
+const validateOpts = (opts: ParserOptions): Error | null => {
+  if (!opts.url) {
+    return new Error("Missing url query param")
   }
-
-  if (!url.startsWith("https://liquipedia.net/")) {
-    res.status(403).send("Use liquipedia URL")
-    return
+  if (!opts.url.startsWith("https://liquipedia.net/")) {
+    return new Error("Use a URL starting with https://liquipedia.net/")
   }
+  return null
+}
 
+const listPrefixes = (req: express.Request): string[] => {
+  const prefixes = []
+  if (req.query.url) {
+    prefixes.push("")
+  }
+  let urlCount = 1
+  while (req.query[`${urlCount}_url`]) {
+    prefixes.push(`${urlCount}_`)
+    urlCount++
+  }
+  return prefixes
+}
+
+cachedRouter.get("/matches.ics", async (req, res) => {
   try {
-    const uniqueEvents = await fetchMatches(url, {
-      competitionRegex,
-      teamsRegex,
-      teamsRegexUseFullnames,
-      conditionIsOr,
-      ignoreTbd,
-      shouldVerbose,
-      matchBothTeams,
-      pastMatchAllowSeconds,
-      expectMissingTeams,
-    })
-    req.uniqueEventsCount = uniqueEvents.length
-    const ics = buildCalendar(uniqueEvents)
-    res = setHeadersForIcs(res)
+    const prefixes = listPrefixes(req)
+
+    let ics = ""
+    req.uniqueEventsCount = 0
+    for (const prefix of prefixes) {
+      const opts = getOptsFromQuery(req, prefix)
+      const validationError = validateOpts(opts)
+      if (validationError) {
+        res.status(400).send(validationError.message)
+        return
+      }
+      const uniqueEvents = await fetchMatches(opts.url, opts)
+      req.uniqueEventsCount += uniqueEvents.length
+      const currentIcs = buildCalendar(uniqueEvents)
+      if (!ics) {
+        ics = currentIcs
+      } else {
+        ics = mergeIcs(ics, currentIcs)
+      }
+    }
+
     if (!req.query.is_from_preset) {
       await updateTelemetry(req.telemetryId, {
-        matches_count: uniqueEvents.length,
+        matches_count: req.uniqueEventsCount,
       })
     }
+    res = setHeadersForIcs(res)
     res.send(ics)
   } catch (error) {
     res.status(500).send("Could not retrieve matches")
@@ -197,147 +228,10 @@ cachedRouter.get("/matches.ics", async (req, res) => {
 
 app.use(cachedRouter)
 
-if (process.argv[2] === "try") {
-  const testCases = [
-    {
-      url: "https://liquipedia.net/leagueoflegends/Liquipedia:Matches",
-      opts: {
-        teamsRegex: "KOI",
-      },
-    },
-    {
-      url: "https://liquipedia.net/rocketleague/Liquipedia:Matches",
-      opts: {},
-    },
-  ]
-  for (const testCase of testCases) {
-    const ics = buildCalendar(await fetchMatches(testCase.url, testCase.opts))
-    console.log(ics)
-  }
-} else if (process.argv[2] === "test") {
-  let testCases = [
-    {
-      name: "League of Legends",
-      url: "https://liquipedia.net/leagueoflegends/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Rocket League",
-      url: "https://liquipedia.net/rocketleague/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Counter-Strike",
-      url: "https://liquipedia.net/counterstrike/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Trackmania",
-      url: "https://liquipedia.net/trackmania/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Starcraft 2",
-      url: "https://liquipedia.net/starcraft2/Liquipedia:Upcoming_and_ongoing_matches",
-      opts: {},
-    },
-    {
-      name: "VALORANT",
-      url: "https://liquipedia.net/valorant/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Dota 2",
-      url: "https://liquipedia.net/dota2/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Overwatch",
-      url: "https://liquipedia.net/overwatch/Liquipedia:Upcoming_and_ongoing_matches",
-      opts: {},
-    },
-    {
-      name: "Mobile Legends",
-      url: "https://liquipedia.net/mobilelegends/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Rainbow Six",
-      url: "https://liquipedia.net/rainbowsix/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Age of Empires",
-      url: "https://liquipedia.net/ageofempires/Liquipedia:Upcoming_and_ongoing_matches",
-      opts: {},
-    },
-    {
-      name: "Brawl Stars",
-      url: "https://liquipedia.net/brawlstars/Liquipedia:Upcoming_and_ongoing_matches",
-      opts: {},
-    },
-    {
-      name: "EA Sports FC",
-      url: "https://liquipedia.net/easportsfc/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Wild Rift",
-      url: "https://liquipedia.net/wildrift/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Heroes of the Storm",
-      url: "https://liquipedia.net/heroes/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Warcraft",
-      url: "https://liquipedia.net/warcraft/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "Hearthstone",
-      url: "https://liquipedia.net/hearthstone/Liquipedia:Matches",
-      opts: {},
-    },
-    {
-      name: "PUBG",
-      url: "https://liquipedia.net/pubgmobile/Liquipedia:Matches",
-      opts: {
-        expectMissingTeams: true,
-      },
-    },
-    {
-      name: "Apex Legends",
-      url: "https://liquipedia.net/apexlegends/Liquipedia:Matches",
-      opts: {
-        expectMissingTeams: true,
-      },
-    },
-  ]
-
-  const results = {}
-
-  const filteredTests = process.argv.slice(3)
-  if (filteredTests.length > 0) {
-    testCases = testCases.filter((testCase) =>
-      filteredTests.includes(testCase.name)
-    )
-  }
-  for (const testCase of testCases) {
-    const ics = buildCalendar(
-      await fetchMatches(testCase.url, {
-        ...testCase.opts,
-        shouldVerbose: true,
-        pastMatchAllowSeconds: 1000 * 60 * 60 * 24 * 30,
-      })
-    )
-    results[testCase.name] = ics.match(/BEGIN:VEVENT/g)?.length
-  }
-  for (const [name, count] of Object.entries(results)) {
-    console.log(`${name}: ${count} events`)
-  }
+if (process.argv[2] === "test") {
+  await test({
+    limitTestsTo: process.argv.slice(3),
+  })
 } else {
   const PORT = process.env.PORT || 9059
   app.listen(PORT, () => {

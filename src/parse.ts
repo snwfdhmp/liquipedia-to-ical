@@ -1,6 +1,8 @@
 import * as cheerio from "cheerio"
+import { getRandomAxios } from "./proxies.js"
+import { getCache, setCache } from "./cache.js"
 
-export const tryMultipleSelectors = (findFunc, selectors) => {
+const tryMultipleSelectors = (findFunc, selectors) => {
   for (const selector of selectors) {
     const elements = findFunc(selector)
     if (elements?.length > 0) return elements
@@ -8,92 +10,106 @@ export const tryMultipleSelectors = (findFunc, selectors) => {
   return null
 }
 
-const getTeam1 = ($, element) => {
-  return tryMultipleSelectors(
+const getTeam = ($, element, isTeam1: boolean) => {
+  let team = tryMultipleSelectors(
     (selector) => $(element).find(selector),
-    [
-      ".team-left span.team-template-text",
-      ".team-left a",
-      ".match-info-header > div:nth-child(1)",
-    ]
+    isTeam1
+      ? [
+          ".team-left span.team-template-text",
+          ".team-left a",
+          ".match-info-header > div:nth-child(1)",
+        ]
+      : [
+          ".team-right span.team-template-text",
+          ".team-right a",
+          ".match-info-header > div:nth-child(3)",
+        ]
   )
     ?.text()
     ?.trim()
+
+  if (team === "TBD") team = "???"
+  return team
 }
 
-const getTeam2 = ($, element) => {
-  return tryMultipleSelectors(
-    (selector) => $(element).find(selector),
-    [
-      ".team-right span.team-template-text",
-      ".team-right a",
-      ".match-info-header > div:nth-child(3)",
+const getTeamFullName = ($, element, isTeam1: boolean) => {
+  try {
+    let text = $(element)
+      .find(isTeam1 ? ".team-left span" : ".team-right span")
+      .attr("data-highlightingclass")
+    text = text?.text()?.trim()
+
+    // second method
+    if (!text) {
+      text = $(element)
+        .find(
+          isTeam1
+            ? ".match-info-header > div:nth-child(1) span.name a"
+            : ".match-info-header > div:nth-child(3) span.name a"
+        )
+        .attr("title")
+      text = text
+    }
+
+    text = text?.replace(/\s*\(page does not exist\)/g, "")
+    if (text === "TBD") text = "??? (to be determined)"
+    return text
+  } catch {
+    return null
+  }
+}
+
+const searchLogoInElements = (imgElements): string | null => {
+  if (!imgElements) return null
+  if (!Array.isArray(imgElements)) imgElements = [imgElements]
+  if (!imgElements.length) return null
+
+  for (const imgElement of imgElements) {
+    if (!imgElement.is("img")) continue
+    const imgList = [
+      imgElement.attr("src"),
+      ...imgElement
+        .attr("srcset")
+        ?.split(", ")
+        ?.map((src) => src?.split(" ")?.[0]),
     ]
-  )
-    ?.text()
-    ?.trim()
-}
+    const bestImg = imgList?.[imgList.length - 1]
+    if (!bestImg) continue
 
-const getTeam1FullName = ($, element) => {
-  try {
-    const text = $(element)
-      .find(".team-left span")
-      .attr("data-highlightingclass")
-    return text?.text()?.trim()
-  } catch {
-    return null
+    if (bestImg.startsWith("/")) {
+      return "https://liquipedia.net" + bestImg
+    }
   }
+  return null
 }
 
-const getTeam2FullName = ($, element) => {
+const getTeamLogo = ($, element, isTeam1: boolean) => {
   try {
-    const text = $(element)
-      .find(".team-right span")
-      .attr("data-highlightingclass")
-    return text?.text()?.trim()
-  } catch {
-    return null
-  }
-}
-
-const searchLogoInElement = (imgElement) => {
-  if (!imgElement) return null
-  const imgList = [
-    imgElement.attr("src"),
-    ...imgElement
-      .attr("srcset")
-      ?.split(", ")
-      ?.map((src) => src?.split(" ")?.[0]),
-  ]
-  let bestImg = imgList?.[imgList.length - 1]
-  if (!bestImg) return null
-
-  if (bestImg.startsWith("/")) {
-    bestImg = "https://liquipedia.net" + bestImg
-  }
-  return bestImg
-}
-
-const getTeam1Logo = ($, element) => {
-  try {
-    const team1ImgElement = $(element).find(
-      ".team-left .team-template-darkmode img"
+    let teamImgElement = $(element).find(
+      isTeam1
+        ? ".team-left .team-template-darkmode img"
+        : ".team-right .team-template-darkmode img"
     )
-    const logo = searchLogoInElement(team1ImgElement)
-    return logo
-  } catch {
-    return null
-  }
-}
 
-const getTeam2Logo = ($, element) => {
-  try {
-    const team2ImgElement = $(element).find(
-      ".team-right .team-template-darkmode img"
+    let logo = searchLogoInElements(teamImgElement)
+
+    if (logo) return logo
+
+    // second method
+    teamImgElement = $(element).find(
+      isTeam1
+        ? ".match-info-header > div:nth-child(1) .team-template-image-icon img"
+        : ".match-info-header > div:nth-child(3) .team-template-image-icon img"
     )
-    const logo = searchLogoInElement(team2ImgElement)
+
+    logo = searchLogoInElements(teamImgElement)
+
     return logo
-  } catch {
+  } catch (e) {
+    console.warn(
+      `Error while getting team logo for ${isTeam1 ? "team1" : "team2"}`,
+      e
+    )
     return null
   }
 }
@@ -140,86 +156,43 @@ const makeDescription = (
   return description
 }
 
-export const parseMatchFromElement = (
-  $: cheerio.CheerioAPI,
-  element,
-  opts: ParserOptions,
-  verbose: (...args: any[]) => void
-): EventData | null => {
-  verbose(`ELEMENT TEXT: ${$(element).text()}`)
+const getTeamUrl = ($, element, isTeam1: boolean): string | null => {
+  try {
+    let teamUrl = $(element)
+      .find(
+        isTeam1
+          ? ".team-left .team-template-darkmode a"
+          : ".team-right .team-template-darkmode a"
+      )
+      ?.attr("href")
 
-  // ================ DATE ================
-  const dateTimestamp = parseInt(
-    $(element).find(".timer-object").attr("data-timestamp")
-  )
-  verbose(`DATE TIMESTAMP: ${dateTimestamp}`)
-  if (dateTimestamp < Date.now() / 1000 - opts.pastMatchAllowSeconds) {
-    verbose(
-      `Ignoring match too old: ${dateTimestamp}\n` +
-        `Date as ISO UTC: ${new Date(dateTimestamp * 1000).toISOString()}`
+    if (!teamUrl) {
+      teamUrl = $(element)
+        .find(
+          isTeam1
+            ? ".match-info-header > div:nth-child(1) a"
+            : ".match-info-header > div:nth-child(3) a"
+        )
+        ?.attr("href")
+    }
+
+    if (teamUrl && teamUrl.startsWith("/")) {
+      teamUrl = "https://liquipedia.net" + teamUrl
+      if (teamUrl.includes("redlink=1")) {
+        teamUrl = null
+      }
+    }
+    return teamUrl
+  } catch (e) {
+    console.warn(
+      `Error while getting team url for ${isTeam1 ? "team1" : "team2"}`,
+      e
     )
     return null
   }
+}
 
-  // ================ TEAM NAMES ================
-  let team1 = getTeam1($, element)
-  verbose(`TEAM 1: ${team1}`)
-  let team2 = getTeam2($, element)
-  verbose(`TEAM 2: ${team2}`)
-
-  let team1fullName = getTeam1FullName($, element)
-  let team2fullName = getTeam2FullName($, element)
-
-  let team1Logo = getTeam1Logo($, element)
-  let team2Logo = getTeam2Logo($, element)
-
-  let team1Url: string
-  let team2Url: string
-
-  try {
-    team1Url = $(element)
-      .find(".team-left .team-template-darkmode a")
-      .attr("href")
-
-    if (team1Url && team1Url.startsWith("/")) {
-      team1Url = "https://liquipedia.net" + team1Url
-      if (team1Url.includes("redlink=1")) {
-        team1Url = null
-      }
-    }
-    team2Url = $(element)
-      .find(".team-right .team-template-darkmode a")
-      .attr("href")
-
-    if (team2Url && team2Url.startsWith("/")) {
-      team2Url = "https://liquipedia.net" + team2Url
-      if (team2Url.includes("redlink=1")) {
-        team2Url = null
-      }
-    }
-  } catch {}
-
-  if (!opts.expectMissingTeams) {
-    if (!team1 || !team2) {
-      verbose("Ignoring match with missing teams")
-      return null
-    }
-  }
-  if (opts.ignoreTbd && team1 === "TBD" && team2 === "TBD") {
-    verbose("Ignoring match with TBD team")
-    return null
-  }
-  if (team1 === "TBD") team1 = "???"
-  if (team2 === "TBD") team2 = "???"
-  if (team1fullName === "TBD") team1fullName = "??? (to be determined)"
-  if (team2fullName === "TBD") team2fullName = "??? (to be determined)"
-
-  // ================ MATCH DESCRIPTORS ================
-  // OLD WAY OF OBTAINING COMPETITION, DOES NOT WORK FOR ALL GAMES
-  // const competition = $(element)
-  //   .find(".match-filler tbody tr td:nth-child(2)")
-  //   .text()
-  //   .trim()
+const getCompetition = ($, element): string => {
   let competitionEl = $(element).find(".match-filler")
   let competition: string
   if (competitionEl.length !== 0) {
@@ -234,41 +207,123 @@ export const parseMatchFromElement = (
       competition = competitionEl.text().trim()
     }
   }
+  return competition
+}
+
+const getDescriptors = (
+  $,
+  element
+): { descriptor: string; descriptorMoreInfo: string } => {
+  const versus = $(element).find(".versus")
+
   let descriptor: string
   let descriptorMoreInfo: string
-  try {
-    const versus = $(element).find(".versus")
-    if (
-      // has score
-      $(versus)
-        .text()
-        .trim()
-        .match(/[0-9]+\:[0-9]+/)
-    ) {
-      descriptor = $(versus).text().trim()
-    } else {
-      descriptor =
-        $(element).find(".versus abbr").text() ||
-        $(element).find(".versus abbr").html() ||
-        $(element).find(".versus abbr").attr("title") ||
-        null
-      descriptorMoreInfo = $(element).find(".versus abbr").attr("title") || null
-    }
-  } catch {}
+  if (
+    // has score
+    $(versus)
+      .text()
+      .trim()
+      .match(/[0-9]+\:[0-9]+/)
+  ) {
+    descriptor = $(versus).text().trim()
+  } else {
+    descriptor =
+      $(element).find(".versus abbr").text() ||
+      $(element).find(".versus abbr").html() ||
+      $(element).find(".versus abbr").attr("title") ||
+      null
+    descriptorMoreInfo = $(element).find(".versus abbr").attr("title") || null
+  }
+  if (descriptor || descriptorMoreInfo) {
+    return { descriptor, descriptorMoreInfo }
+  }
 
-  let winnerSide = ""
+  // second method
+  const descriptorEl = $(element).find(".match-info-header-scoreholder")
+  if (descriptorEl.length) {
+    descriptor =
+      descriptorEl.text() ||
+      descriptorEl.html() ||
+      descriptorEl.attr("title") ||
+      null
+    descriptorMoreInfo = descriptorEl.attr("title") || null
+  }
+  return { descriptor, descriptorMoreInfo }
+}
+
+const getWinnerSide = ($, element): string => {
   try {
     const winnerLeft = $(element).hasClass("winner-left")
     if (winnerLeft) {
-      winnerSide = "left"
+      return "left"
     }
     const winnerRight = $(element).hasClass("winner-right")
     if (winnerRight) {
-      winnerSide = "right"
+      return "right"
     }
   } catch (e) {
     console.log(`Error while checking for winner: ${e}`)
   }
+
+  // second method
+  try {
+    const winnerLeft = $(element)
+      .find(".match-info-header > div:nth-child(1)")
+      .hasClass("match-info-header-winner")
+    if (winnerLeft) {
+      return "left"
+    }
+    const winnerRight = $(element)
+      .find(".match-info-header > div:nth-child(3)")
+      .hasClass("match-info-header-winner")
+    if (winnerRight) {
+      return "right"
+    }
+  } catch (e) {
+    console.log(`Error while checking for winner: ${e}`)
+  }
+}
+
+const getDateTimestamp = ($, element): number => {
+  const dateTimestamp = parseInt(
+    $(element).find(".timer-object").attr("data-timestamp")
+  )
+  return dateTimestamp
+}
+
+const parseMatchFromElement = (
+  $: cheerio.CheerioAPI,
+  element,
+  opts: ParserOptions,
+  verbose: (...args: any[]) => void
+): EventData | null => {
+  verbose(`ELEMENT TEXT: ${$(element).text()}`)
+
+  // ================ DATE ================
+  const dateTimestamp = getDateTimestamp($, element)
+
+  // ================ TEAM NAMES ================
+  let team1 = getTeam($, element, true)
+  let team2 = getTeam($, element, false)
+
+  let team1fullName = getTeamFullName($, element, true)
+  let team2fullName = getTeamFullName($, element, false)
+
+  let team1Logo = getTeamLogo($, element, true)
+  let team2Logo = getTeamLogo($, element, false)
+
+  let team1Url = getTeamUrl($, element, true)
+  let team2Url = getTeamUrl($, element, false)
+
+  let isMissingTeams = false
+  if (!team1 || !team2) {
+    isMissingTeams = true
+  }
+
+  let competition = getCompetition($, element)
+  let { descriptor, descriptorMoreInfo } = getDescriptors($, element)
+
+  let winnerSide = getWinnerSide($, element)
 
   // ================ COMPILE EVENT DATA ================
   let summary = makeSummary(
@@ -309,5 +364,47 @@ export const parseMatchFromElement = (
     descriptorMoreInfo,
     team1Url,
     team2Url,
+    isMissingTeams,
   }
+}
+
+/**
+ * Parse all events from a URL
+ *
+ * Uses cache for performance
+ *
+ * Events are not filtered here, they should be filtered later
+ */
+export const parseEventsFromUrl = async (
+  url: string,
+  opts: ParserOptions,
+  verbose: (...args: any[]) => void
+): Promise<EventData[]> => {
+  const cacheKey = `parseEventsFromUrl-${url}`
+  const cached = getCache(cacheKey)
+  if (cached) {
+    return cached
+  }
+
+  const events = []
+  const proxyAxios = await getRandomAxios()
+  const $ = cheerio.load((await proxyAxios.get(url)).data)
+
+  // the different selectors to try, depends on page layout
+  const matchSelectorsToTry = [".wikitable", ".match", ".match-info"]
+  let elements = tryMultipleSelectors($, matchSelectorsToTry) || []
+  if (!elements) elements = []
+
+  // ================ FOR EACH MATCH ================
+  elements.each((index, element) => {
+    const eventData = parseMatchFromElement($, element, opts, verbose)
+    if (!eventData) return
+    // ================ CHECK IF EVENT SHOULD BE SELECTED ================
+
+    events.push(eventData)
+    verbose({ eventData })
+  })
+
+  setCache(cacheKey, events)
+  return events
 }

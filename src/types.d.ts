@@ -1,4 +1,5 @@
 interface ParserOptions {
+  url?: string
   competitionRegex?: string
   teamsRegex?: string
   teamsRegexUseFullnames?: boolean
@@ -8,7 +9,8 @@ interface ParserOptions {
   shouldVerbose?: boolean
   pastMatchAllowSeconds?: number
 
-  expectMissingTeams?: boolean
+  expectMissingTeams?: boolean // will completely ignore
+  allowMissingTeams?: boolean // will try but ignore if not found
 }
 
 interface EventData {
@@ -28,4 +30,5 @@ interface EventData {
   descriptorMoreInfo: string
   team1Url: string
   team2Url: string
+  isMissingTeams: boolean
 }

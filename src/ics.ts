@@ -1,4 +1,4 @@
-const timestampToIcs = (timestamp) => {
+const timestampToIcs = (timestamp: number) => {
   const date = new Date(timestamp * 1000)
 
   // produce YYYYMMDD
@@ -15,7 +15,7 @@ const timestampToIcs = (timestamp) => {
   return `${datePart}T${timePart}`
 }
 
-export const buildCalendar = (events) => {
+export const buildCalendar = (events: EventData[]) => {
   const optionalData = {
     "X-LIQUIPEDIATOICAL-COMPETITION": "competition",
     "X-LIQUIPEDIATOICAL-TEAMLEFT": "team1",
@@ -66,11 +66,11 @@ const icsWrappers = {
   after: ["END:VCALENDAR"],
 }
 
-const wrapIcs = (ics) => {
+const wrapIcs = (ics: string) => {
   return [...icsWrappers.before, ics, ...icsWrappers.after].join("\n")
 }
 
-const unwrapIcs = (ics) => {
+const unwrapIcs = (ics: string) => {
   const lines = ics.split("\n")
   const filteredLines = lines.filter(
     (line) =>
@@ -86,7 +86,7 @@ const unwrapIcs = (ics) => {
   return filteredLines.join("\n").trim()
 }
 
-export const mergeIcs = (ics1, ics2) => {
+export const mergeIcs = (ics1: string, ics2: string) => {
   const mergedIcs = wrapIcs([unwrapIcs(ics1), unwrapIcs(ics2)].join("\n"))
   // remove duplicates
 

@@ -5,7 +5,7 @@
         "target": "esnext",
         "pretty": true,
         "sourceMap": true,
-        "rootDir": "src",
+        "rootDir": ".",
         "outDir": ".dist"
     },
     "include": [

@@ -1,6 +1,4 @@
-import * as cheerio from "cheerio"
-import { parseMatchFromElement, tryMultipleSelectors } from "./parse.js"
-import { getRandomAxios } from "./proxies.js"
+import { parseEventsFromUrl } from "./parse.js"
 
 const competitionMatches = (event, regex) => {
   const regexExtended = new RegExp(regex, "i")
@@ -14,8 +12,8 @@ const teamsMatches = (event, regex, matchBothTeams, useFullnames = false) => {
   const team1 = useFullnames ? event.team1fullName : event.team1
   const team2 = useFullnames ? event.team2fullName : event.team2
 
-  const team1ok = team1.match(regexExtended)
-  const team2ok = team2.match(regexExtended)
+  const team1ok = team1?.match(regexExtended)
+  const team2ok = team2?.match(regexExtended)
 
   if (!team1ok && !team2ok) return false
   if (matchBothTeams) {
@@ -33,40 +31,69 @@ export const filterEvents = (
   opts: ParserOptions,
   verbose: (...args: any[]) => void
 ) => {
-  return events.filter((eventData) => {
-    const competitionOk = competitionMatches(eventData, opts.competitionRegex)
-    const teamsOk =
-      opts.expectMissingTeams ||
-      (opts.teamsRegexUseFullnames
-        ? teamsFullnameMatches(eventData, opts.teamsRegex, opts.matchBothTeams)
-        : teamsMatches(eventData, opts.teamsRegex, opts.matchBothTeams))
+  const rejectionRules = {
+    date: (eventData: EventData) => {
+      return (
+        eventData.dateTimestamp >=
+        Date.now() / 1000 - opts.pastMatchAllowSeconds
+      )
+    },
+    missingTeams: (eventData: EventData) => {
+      if (!eventData.team1 || !eventData.team2) {
+        return opts.allowMissingTeams || opts.expectMissingTeams
+      }
+      return true
+    },
+    ignoreTbd: (eventData: EventData) => {
+      if (
+        opts.ignoreTbd &&
+        eventData.team1 === "???" &&
+        eventData.team2 === "???"
+      )
+        return false
+      return true
+    },
+    regex: (eventData: EventData) => {
+      const competitionOk = competitionMatches(eventData, opts.competitionRegex)
+      const teamsOk =
+        opts.expectMissingTeams ||
+        (opts.allowMissingTeams && eventData.isMissingTeams) ||
+        (opts.teamsRegexUseFullnames
+          ? teamsFullnameMatches(
+              eventData,
+              opts.teamsRegex,
+              opts.matchBothTeams
+            )
+          : teamsMatches(eventData, opts.teamsRegex, opts.matchBothTeams))
 
-    let shouldBeSelected = false
-    if (opts.conditionIsOr) {
-      shouldBeSelected = competitionOk || teamsOk
-    } else {
-      shouldBeSelected = competitionOk && teamsOk
+      if (opts.conditionIsOr) {
+        return competitionOk || teamsOk
+      } else {
+        return competitionOk && teamsOk
+      }
+    },
+  }
+
+  return events.filter((eventData) => {
+    let failingTest: string | null
+    for (const [key, value] of Object.entries(rejectionRules)) {
+      if (!value(eventData)) {
+        failingTest = key
+        break
+      }
     }
-    verbose({
-      competition: eventData.competition,
-      competitionOk,
-      team1: eventData.team1,
-      team2: eventData.team2,
-      teamsOk,
-      conditionIsOr: opts.conditionIsOr,
-      shouldBeSelected,
+
+    verbose("EVENT", {
+      selected: !failingTest,
+      failingTest,
+      eventData,
+      opts,
     })
 
-    if (!shouldBeSelected) {
-      verbose(`Ignoring match: ${JSON.stringify(eventData)}`)
-      return false
-    }
-
-    return true
+    return !failingTest
   })
 }
 
-// Fonction pour récupérer les matchs à venir de Rocket League
 export async function fetchMatches(url: string, opts: ParserOptions) {
   const DEFAULT_OPTS: ParserOptions = {
     competitionRegex: ``,
@@ -89,26 +116,7 @@ export async function fetchMatches(url: string, opts: ParserOptions) {
     if (opts.shouldVerbose) console.log(...args)
   }
   try {
-    let events = []
-
-    const proxyAxios = await getRandomAxios()
-    const $ = cheerio.load((await proxyAxios.get(url)).data)
-
-    // the different selectors to try, depends on page layout
-    const matchSelectorsToTry = [".wikitable", ".match", ".match-info"]
-    let elements = tryMultipleSelectors($, matchSelectorsToTry) || []
-    if (!elements) elements = []
-
-    // ================ FOR EACH MATCH ================
-    elements.each((index, element) => {
-      const eventData = parseMatchFromElement($, element, opts, verbose)
-      if (!eventData) return
-      // ================ CHECK IF EVENT SHOULD BE SELECTED ================
-
-      events.push(eventData)
-      verbose({ eventData })
-    })
-
+    let events = await parseEventsFromUrl(url, opts, verbose)
     events = filterEvents(events, opts, verbose)
 
     // ================ FILTER UNIQUE EVENTS ================
