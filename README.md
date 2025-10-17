@@ -140,6 +140,23 @@ The service supports **50+ esports titles** including:
 - 💬 Contact on Discord: `mjo___`
 - 🌐 Test your URL at [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
 
+## Additional iCal tags
+
+|name|value|
+|---|---|
+|X-LIQUIPEDIATOICAL-COMPETITION|competition|
+|X-LIQUIPEDIATOICAL-TEAMLEFT|team1|
+|X-LIQUIPEDIATOICAL-TEAMLEFTFULLNAME|team1fullName|
+|X-LIQUIPEDIATOICAL-TEAMLEFTURL|team1Url|
+|X-LIQUIPEDIATOICAL-TEAMLEFTLOGO|team1Logo|
+|X-LIQUIPEDIATOICAL-TEAMRIGHT|team2|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTFULLNAME|team2fullName|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTURL|team2Url|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTLOGO|team2Logo|
+|X-LIQUIPEDIATOICAL-WINNERSIDE|winnerSide|
+|X-LIQUIPEDIATOICAL-DESCRIPTOR|descriptor|
+|X-LIQUIPEDIATOICAL-DESCRIPTORMOREINFO|descriptorMoreInfo|
+
 ## 🛠️ Contributing
 
 ### Prerequisites
