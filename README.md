@@ -113,124 +113,6 @@ The service supports **50+ esports titles** including:
 
 [View complete list of supported games](meta/supportedGames.md)
 
-## 🛠️ Installation & Development
-
-### Prerequisites
-- Node.js 18+
-- pnpm (recommended) or npm
-
-### Setup
-```bash
-# Clone the repository
-git clone https://github.com/snwfdhmp/liquipedia-cal.git
-cd liquipedia-cal
-
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm run dev
-
-# Run tests
-pnpm run test
-```
-
-### Environment Variables
-```bash
-# Optional: Database configuration
-DATABASE_URL=./data/telemetry.db
-
-# Optional: Server port
-PORT=9059
-```
-
-## 📁 Project Structure
-
-```
-liquipedia-cal/
-├── src/
-│   ├── main.ts          # Express server and API routes
-│   ├── fetch.ts         # Liquipedia data fetching logic
-│   ├── parse.ts         # HTML parsing and match extraction
-│   ├── ics.ts           # iCalendar generation
-│   ├── presets.ts       # Pre-configured tournament filters
-│   ├── cache.ts         # Caching layer
-│   ├── telemetry.ts     # Usage analytics
-│   └── types.d.ts       # TypeScript definitions
-├── meta/
-│   ├── supportedGames.ts           # Game configurations
-│   └── supportedGames.doNotEdit.json  # Generated game data
-├── scripts/
-│   ├── computeSupportedGames.ts    # Game discovery script
-│   └── downloadTestData.ts        # Test data management
-└── wui/                 # Web UI (React/Vite)
-```
-
-## 🧪 Testing
-
-The project includes comprehensive testing for all supported games:
-
-```bash
-# Run all tests
-pnpm run test
-
-# Run tests for specific games
-pnpm run test rocketleague valorant
-
-# Verbose output
-tsx src/main.ts test -v
-
-# Only show errors
-tsx src/main.ts test -o
-```
-
-## 🔧 Configuration
-
-### Adding New Games
-
-1. Add game configuration to `meta/supportedGames.config.ts`
-2. Run `tsx scripts/computeSupportedGames.ts` to update the game list
-3. Test the new game: `pnpm run test your-game-id`
-
-### Custom Presets
-
-Add new presets in `src/presets.ts`:
-```typescript
-export const presets: Record<string, string[]> = {
-  "my-preset": [
-    "https://ics.snwfdhmp.com/matches.ics?url=...",
-  ],
-}
-```
-
-## 📊 Usage Analytics
-
-The service includes privacy-focused analytics to track:
-- Request counts and response times
-- Popular games and tournaments
-- Error rates and performance metrics
-
-Analytics help improve service reliability and identify popular content.
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how to help:
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make your changes** and add tests
-4. **Run tests**: `pnpm run test`
-5. **Commit changes**: `git commit -m 'Add amazing feature'`
-6. **Push to branch**: `git push origin feature/amazing-feature`
-7. **Open a Pull Request**
-
-### Contribution Guidelines
-
-- Add tests for new features
-- Ensure all existing tests pass
-- Follow TypeScript best practices
-- Update documentation as needed
-- Test with multiple games before submitting
 
 ## 🐛 Troubleshooting
 
@@ -256,23 +138,61 @@ We welcome contributions! Here's how to help:
 - 💬 Contact on Discord: `mjo___`
 - 🌐 Test your URL at [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
 
-## 📄 License
+## 🛠️ Contributing
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Prerequisites
+- Node.js 18+
+- pnpm (recommended) or npm
 
-## 🙏 Acknowledgments
+### Setup
+```bash
+# Clone the repository
+git clone https://github.com/snwfdhmp/liquipedia-cal.git
+cd liquipedia-cal
 
-- **Liquipedia** - For providing comprehensive esports data
-- **Community Contributors** - For testing and feedback
-- **Open Source Libraries** - Express, Cheerio, Puppeteer, and others
+# Install dependencies
+pnpm install
 
-## 🔗 Related Projects
+# Start development server
+pnpm run dev
 
-- [Liquipedia](https://liquipedia.net/) - The source of all esports data
-- [iCal.js](https://github.com/mozilla-comm/ical.js) - iCalendar parsing library
+# Run tests
+pnpm run test
+```
+
+## 🧪 Testing
+
+The project includes comprehensive testing for all supported games:
+
+```bash
+# Run all tests
+pnpm run test
+
+# Run tests and only show failing tests
+pnpm run test -o
+
+# Run tests for Rocket League
+pnpm run test "Rocket League"
+
+# Run tests for Rocket League and verbose output
+pnpm run test -v "Rocket League"
+```
+
+### Custom Presets
+
+Add new presets in `src/presets.ts`:
+```typescript
+export const presets: Record<string, string[]> = {
+  "my-preset": [
+    "https://ics.snwfdhmp.com/matches.ics?url=...",
+  ],
+}
+```
 
 ---
 
 **Made with ❤️ for the esports community**
 
 *Star ⭐ this repository if you find it useful!*
+
+*[Sponsoring](https://github.com/sponsors/snwfdhmp) helps me spending time on this!*
