@@ -102,7 +102,6 @@ The service supports **50+ esports titles** including:
 
 [View complete list of supported games](meta/supportedGames.md)
 
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
