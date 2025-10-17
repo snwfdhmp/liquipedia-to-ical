@@ -3,7 +3,7 @@
 <img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="70%">
 
 <a href="https://ics.snwfdhmp.com">
-  <img src="https://i.ibb.co/sdpwfTMv/image.png" alt="Liquipedia to iCal" width="70%">
+  <img src="https://github.com/user-attachments/assets/346e3405-1590-48a1-85de-30fb9d846c05" alt="Liquipedia to iCal" width="70%">
 </a>
 
 - Sync Liquipedia matches to your Calendar.
