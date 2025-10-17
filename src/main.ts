@@ -6,11 +6,12 @@ import { presets } from "./presets.js"
 import { fetchMatches } from "./fetch.js"
 import { getCache, setCache } from "./cache.js"
 import { buildCalendar, mergeIcs } from "./ics.js"
-import { test } from "./test.js"
+import { test, TestOptions } from "./test.js"
+import { supportedGames } from "../meta/supportedGames.js"
 
 const __dirname = new URL(".", import.meta.url).pathname
 
-const setHeadersForIcs = (res) => {
+const setHeadersForIcs = (res: express.Response) => {
   res.setHeader("Content-Type", "text/calendar; charset=utf-8")
   res.setHeader("Content-Disposition", "attachment; filename=calendar.ics")
   return res
@@ -73,29 +74,8 @@ cachedRouter.use(async (req, res, next) => {
   req.telemetryId = telemetryId
   req.timeStart = Date.now()
 
-  const cached = await getCache(req.originalUrl)
-  if (cached) {
-    if (!isFromPreset) {
-      const inCacheMatchesCount = cached.match(/BEGIN:VEVENT/g)?.length || 0
-      await updateTelemetry(telemetryId, {
-        http_status: 200,
-        from_cache: true,
-        spent_ms: Date.now() - req.timeStart,
-        matches_count: inCacheMatchesCount,
-      })
-    }
-    console.log(`Serving cached response for ${req.originalUrl}`)
-    res.send(cached)
-    return
-  }
   res.sendResponse = res.send
-  res.send = (body) => {
-    if (res.statusCode === 200) {
-      console.log(`Caching response for ${req.originalUrl}`)
-      setCache(req.originalUrl, body)
-    } else {
-      console.log(`Not caching response for ${req.originalUrl}`)
-    }
+  res.send = (body: string) => {
     if (!isFromPreset) {
       updateTelemetry(req.telemetryId, {
         http_status: res.statusCode,
@@ -183,12 +163,29 @@ const listPrefixes = (req: express.Request): string[] => {
   if (req.query.url) {
     prefixes.push("")
   }
+
+  // test 0 to prevent different user start-index to fail (some use 0, some use 1)
+  if (req.query["0_url"]) {
+    prefixes.push("0_")
+  }
   let urlCount = 1
   while (req.query[`${urlCount}_url`]) {
     prefixes.push(`${urlCount}_`)
     urlCount++
   }
   return prefixes
+}
+
+const getUrlCandidates = (url: string): string[] => {
+  const candidates = [url]
+
+  const supportedGame = supportedGames.find((game) =>
+    url.startsWith(game.baseUrl)
+  )
+  if (supportedGame) {
+    candidates.push(supportedGame.url)
+  }
+  return candidates
 }
 
 cachedRouter.get("/matches.ics", async (req, res) => {
@@ -204,7 +201,28 @@ cachedRouter.get("/matches.ics", async (req, res) => {
         res.status(400).send(validationError.message)
         return
       }
-      const uniqueEvents = await fetchMatches(opts.url, opts)
+      let uniqueEvents: EventData[] = []
+      let urlCandidates: string[] = getUrlCandidates(opts.url)
+
+      let hadSuccess = false
+      for (const urlCandidate of urlCandidates) {
+        try {
+          const events = await fetchMatches(urlCandidate, opts)
+          uniqueEvents = events
+          hadSuccess = true
+          break
+        } catch (error) {}
+      }
+
+      if (!hadSuccess) {
+        res
+          .status(400)
+          .send(
+            "Could not retrieve matches, most probably because the URL is not a Liquipedia match page. Example: https://liquipedia.net/rocketleague/Liquipedia:Matches"
+          )
+        return
+      }
+
       req.uniqueEventsCount += uniqueEvents.length
       const currentIcs = buildCalendar(uniqueEvents)
       if (!ics) {
@@ -229,9 +247,32 @@ cachedRouter.get("/matches.ics", async (req, res) => {
 app.use(cachedRouter)
 
 if (process.argv[2] === "test") {
-  await test({
-    limitTestsTo: process.argv.slice(3),
-  })
+  const availablesArgs = process.argv.slice(3)
+
+  const testOpts: TestOptions = {
+    limitTestsTo: [],
+    opts: {
+      verbose: false,
+      onlyOutputErrors: false,
+    },
+  }
+  for (let i = 0; i < availablesArgs.length; i++) {
+    const arg = availablesArgs[i]
+
+    switch (arg) {
+      case "-v":
+        testOpts.opts.verbose = true
+        break
+      case "-o":
+        testOpts.opts.onlyOutputErrors = true
+        break
+      default:
+        testOpts.limitTestsTo.push(arg)
+        break
+    }
+  }
+
+  await test(testOpts)
 } else {
   const PORT = process.env.PORT || 9059
   app.listen(PORT, () => {

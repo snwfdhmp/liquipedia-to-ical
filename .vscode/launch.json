@@ -8,7 +8,7 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["--import", "tsx"],
       "program": "${workspaceFolder}/src/main.ts",
-      "args": ["test", "Rocket League"],
+      "args": ["test", "Counter-Strike"],
       "cwd": "${workspaceFolder}",
       "env": { "NODE_ENV": "development" }
     }

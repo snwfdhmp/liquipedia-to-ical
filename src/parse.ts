@@ -37,24 +37,41 @@ const getTeamFullName = ($, element, isTeam1: boolean) => {
     let text = $(element)
       .find(isTeam1 ? ".team-left span" : ".team-right span")
       .attr("data-highlightingclass")
-    text = text?.text()?.trim()
+      ?.text?.()
+      ?.trim()
 
-    // second method
     if (!text) {
-      text = $(element)
-        .find(
+      // second method
+      text = tryMultipleSelectors(
+        (selector) => $(element).find(selector)?.attr("title")?.trim(),
+        [
           isTeam1
             ? ".match-info-header > div:nth-child(1) span.name a"
-            : ".match-info-header > div:nth-child(3) span.name a"
-        )
-        .attr("title")
-      text = text
+            : ".match-info-header > div:nth-child(3) span.name a",
+          isTeam1
+            ? ".team-left .inline-player a"
+            : ".team-right .inline-player a",
+          isTeam1
+            ? ".team-left .team-template-text a"
+            : ".team-right .team-template-text a",
+          isTeam1
+            ? ".team-left .team-template-image-icon a"
+            : ".team-right .team-template-image-icon a",
+          isTeam1
+            ? ".team-left .starcraft-inline-player a"
+            : ".team-right .starcraft-inline-player a",
+        ]
+      )
     }
 
     text = text?.replace(/\s*\(page does not exist\)/g, "")
     if (text === "TBD") text = "??? (to be determined)"
     return text
-  } catch {
+  } catch (e) {
+    console.warn(
+      `Error while getting team full name for ${isTeam1 ? "team1" : "team2"}`,
+      e
+    )
     return null
   }
 }
@@ -66,12 +83,11 @@ const searchLogoInElements = (imgElements): string | null => {
 
   for (const imgElement of imgElements) {
     if (!imgElement.is("img")) continue
+
+    const srcsets = imgElement.attr("srcset")?.split(", ") || []
     const imgList = [
       imgElement.attr("src"),
-      ...imgElement
-        .attr("srcset")
-        ?.split(", ")
-        ?.map((src) => src?.split(" ")?.[0]),
+      ...srcsets.map((src) => src?.split(" ")?.[0]),
     ]
     const bestImg = imgList?.[imgList.length - 1]
     if (!bestImg) continue
@@ -85,24 +101,32 @@ const searchLogoInElements = (imgElements): string | null => {
 
 const getTeamLogo = ($, element, isTeam1: boolean) => {
   try {
-    let teamImgElement = $(element).find(
-      isTeam1
-        ? ".team-left .team-template-darkmode img"
-        : ".team-right .team-template-darkmode img"
+    let logo = tryMultipleSelectors(
+      (selector) => searchLogoInElements($(element).find(selector)),
+      [
+        isTeam1
+          ? ".team-left .team-template-darkmode img"
+          : ".team-right .team-template-darkmode img",
+        isTeam1
+          ? ".team-left .team-template-text img"
+          : ".team-right .team-template-text img",
+        isTeam1
+          ? ".team-left .team-template-image-icon img"
+          : ".team-right .team-template-image-icon img",
+        isTeam1
+          ? ".match-info-header > div:nth-child(1) .team-template-image-icon img"
+          : ".match-info-header > div:nth-child(3) .team-template-image-icon img",
+        isTeam1
+          ? ".match-info-header > div:nth-child(1) img"
+          : ".match-info-header > div:nth-child(3) img",
+        isTeam1
+          ? ".team-left .inline-player .flag img"
+          : ".team-right .inline-player .flag img",
+        isTeam1
+          ? ".team-left .starcraft-inline-player .flag img"
+          : ".team-right .starcraft-inline-player .flag img",
+      ]
     )
-
-    let logo = searchLogoInElements(teamImgElement)
-
-    if (logo) return logo
-
-    // second method
-    teamImgElement = $(element).find(
-      isTeam1
-        ? ".match-info-header > div:nth-child(1) .team-template-image-icon img"
-        : ".match-info-header > div:nth-child(3) .team-template-image-icon img"
-    )
-
-    logo = searchLogoInElements(teamImgElement)
 
     return logo
   } catch (e) {
@@ -158,31 +182,36 @@ const makeDescription = (
 
 const getTeamUrl = ($, element, isTeam1: boolean): string | null => {
   try {
-    let teamUrl = $(element)
-      .find(
+    let teamUrl = tryMultipleSelectors(
+      (selector) => $(element).find(selector),
+      [
         isTeam1
           ? ".team-left .team-template-darkmode a"
-          : ".team-right .team-template-darkmode a"
-      )
-      ?.attr("href")
+          : ".team-right .team-template-darkmode a",
+        isTeam1
+          ? ".team-left .team-template-text a"
+          : ".team-right .team-template-text a",
+        isTeam1
+          ? ".team-left .inline-player a"
+          : ".team-right .inline-player a",
+        isTeam1
+          ? ".team-left .starcraft-inline-player a"
+          : ".team-right .starcraft-inline-player a",
+        isTeam1
+          ? ".match-info-header > div:nth-child(1) a"
+          : ".match-info-header > div:nth-child(3) a",
+      ]
+    )
 
-    if (!teamUrl) {
-      teamUrl = $(element)
-        .find(
-          isTeam1
-            ? ".match-info-header > div:nth-child(1) a"
-            : ".match-info-header > div:nth-child(3) a"
-        )
-        ?.attr("href")
-    }
+    let teamHref = teamUrl?.attr("href")
 
-    if (teamUrl && teamUrl.startsWith("/")) {
-      teamUrl = "https://liquipedia.net" + teamUrl
-      if (teamUrl.includes("redlink=1")) {
-        teamUrl = null
+    if (teamHref && teamHref.startsWith("/")) {
+      teamHref = "https://liquipedia.net" + teamHref
+      if (teamHref.includes("redlink=1")) {
+        teamHref = null
       }
     }
-    return teamUrl
+    return teamHref
   } catch (e) {
     console.warn(
       `Error while getting team url for ${isTeam1 ? "team1" : "team2"}`,
@@ -198,22 +227,31 @@ const getCompetition = ($, element): string => {
   if (competitionEl.length !== 0) {
     competitionEl.find(".match-countdown").remove()
     competition = competitionEl.text().trim()
-  } else {
-    competitionEl = tryMultipleSelectors(
-      (selector) => $(element).find(selector),
-      [".match-tournament", ".match-info-tournament"]
-    )
-    if (competitionEl) {
-      competition = competitionEl.text().trim()
-    }
+    return competition
   }
-  return competition
+
+  // second method
+  competitionEl = tryMultipleSelectors(
+    (selector) => $(element).find(selector),
+    [".match-tournament", ".match-info-tournament"]
+  )
+  if (competitionEl) {
+    competition = competitionEl.text().trim()
+    return competition
+  }
+
+  return ""
 }
 
 const getDescriptors = (
   $,
   element
 ): { descriptor: string; descriptorMoreInfo: string } => {
+  const cleanupDescriptor = (descriptor: string) => {
+    if (!descriptor) return descriptor
+    return descriptor.replace(/\s*vs\s*/g, "")
+  }
+
   const versus = $(element).find(".versus")
 
   let descriptor: string
@@ -235,7 +273,7 @@ const getDescriptors = (
     descriptorMoreInfo = $(element).find(".versus abbr").attr("title") || null
   }
   if (descriptor || descriptorMoreInfo) {
-    return { descriptor, descriptorMoreInfo }
+    return { descriptor: cleanupDescriptor(descriptor), descriptorMoreInfo }
   }
 
   // second method
@@ -248,7 +286,7 @@ const getDescriptors = (
       null
     descriptorMoreInfo = descriptorEl.attr("title") || null
   }
-  return { descriptor, descriptorMoreInfo }
+  return { descriptor: cleanupDescriptor(descriptor), descriptorMoreInfo }
 }
 
 const getWinnerSide = ($, element): string => {
@@ -297,12 +335,8 @@ const parseMatchFromElement = (
   opts: ParserOptions,
   verbose: (...args: any[]) => void
 ): EventData | null => {
-  verbose(`ELEMENT TEXT: ${$(element).text()}`)
-
-  // ================ DATE ================
   const dateTimestamp = getDateTimestamp($, element)
 
-  // ================ TEAM NAMES ================
   let team1 = getTeam($, element, true)
   let team2 = getTeam($, element, false)
 
@@ -315,17 +349,17 @@ const parseMatchFromElement = (
   let team1Url = getTeamUrl($, element, true)
   let team2Url = getTeamUrl($, element, false)
 
-  let isMissingTeams = false
-  if (!team1 || !team2) {
-    isMissingTeams = true
-  }
-
   let competition = getCompetition($, element)
   let { descriptor, descriptorMoreInfo } = getDescriptors($, element)
 
   let winnerSide = getWinnerSide($, element)
 
   // ================ COMPILE EVENT DATA ================
+  let isMissingTeams = false
+  if (!team1 || !team2) {
+    isMissingTeams = true
+  }
+
   let summary = makeSummary(
     team1,
     team2,
@@ -343,7 +377,7 @@ const parseMatchFromElement = (
   )
 
   const uid =
-    `${competition.replace(
+    `${competition?.replace(
       /[^a-zA-Z0-9\-]/g,
       ""
     )}/${dateTimestamp}/${team1}/${team2}` + "@liquipedia-calendar.snwfdhmp.com"
@@ -397,12 +431,17 @@ export const parseEventsFromUrl = async (
 
   // ================ FOR EACH MATCH ================
   elements.each((index, element) => {
-    const eventData = parseMatchFromElement($, element, opts, verbose)
-    if (!eventData) return
-    // ================ CHECK IF EVENT SHOULD BE SELECTED ================
+    try {
+      const eventData = parseMatchFromElement($, element, opts, verbose)
+      if (!eventData) return
+      // ================ CHECK IF EVENT SHOULD BE SELECTED ================
 
-    events.push(eventData)
-    verbose({ eventData })
+      events.push(eventData)
+      verbose({ eventData })
+    } catch (e) {
+      console.error(`Error while parsing match from element: ${e}`)
+      return
+    }
   })
 
   setCache(cacheKey, events)

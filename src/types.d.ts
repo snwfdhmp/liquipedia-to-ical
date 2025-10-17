@@ -32,3 +32,10 @@ interface EventData {
   team2Url: string
   isMissingTeams: boolean
 }
+
+interface SupportedGame {
+  name: string
+  url: string
+  baseUrl: string
+  enforcedOpts: ParserOptions
+}
