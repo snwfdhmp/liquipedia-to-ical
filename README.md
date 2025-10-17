@@ -38,6 +38,8 @@
 | StarCraft         | ✅ _Can get calendar events for StarCraft_                        |
 | Other games       | Test yourself and report |
 
+We also support: Critical Ops, Omega Strikers, Arena FPS, Paladins, War Thunder, Sim Racing, Rematch, Team Fortress, Magic, Chess, Pokémon, Dota Underlords, Naraka: Bladepoint, GeoGuessr, Splitgate, Deadlock, Teamfight Tactics, Clash of Clans, Tetris, Autochess, Halo, Splatoon, SMITE, Clash Royale, Zula, osu!, PUBG Mobile, Marvel Rivals, CrossFire, World of Warcraft, Free Fire, Tarkov Arena, and maybe more!
+
 Feel free to report any issue or any working/broken game in [issues](https://github.com/snwfdhmp/liquipedia-cal/issues).
 
 ## What is it ?
