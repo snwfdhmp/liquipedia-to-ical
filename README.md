@@ -8,6 +8,9 @@
 [![GitHub issues](https://img.shields.io/github/issues/snwfdhmp/liquipedia-cal.svg)](https://github.com/snwfdhmp/liquipedia-cal/issues)
 
 
+<img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="70%">
+
+
 **Automatically sync esports matches from Liquipedia to your calendar** with customizable filters for competitions and teams. Works with Google Calendar, Apple Calendar, Outlook, and any calendar application that supports iCal/ICS feeds.
 
 🌐 **Live Service**: [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
