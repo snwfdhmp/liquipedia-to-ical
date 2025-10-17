@@ -98,17 +98,6 @@ The service supports **50+ esports titles** including:
 - Overwatch
 - Starcraft II
 - Trackmania
-
-**Fighting Games:**
-- Street Fighter
-- Tekken
-- Super Smash Bros
-- Guilty Gear
-
-**Mobile & Others:**
-- PUBG Mobile
-- Free Fire
-- Arena of Valor
 - And many more...
 
 [View complete list of supported games](meta/supportedGames.md)
