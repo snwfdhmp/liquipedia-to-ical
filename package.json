@@ -9,10 +9,12 @@
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "axios-retry": "^4.5.0",
     "cheerio": "^1.0.0",
     "colors": "^1.4.0",
     "dotenv": "^17.2.3",
     "express": "^4.21.0",
+    "ical.js": "^2.2.1",
     "node-fetch": "2",
     "puppeteer": "^23.3.0",
     "sqlite": "^5.1.1",
@@ -25,6 +27,7 @@
   },
   "scripts": {
     "start": "tsx src/main.ts",
-    "dev": "tsx --watch src/main.ts"
+    "dev": "tsx --watch src/main.ts",
+    "test": "tsx src/main.ts test -o"
   }
 }

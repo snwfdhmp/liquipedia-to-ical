@@ -2,12 +2,14 @@ import { supportedGames } from "../meta/supportedGames.js"
 import { fetchMatches } from "./fetch.js"
 import { buildCalendar } from "./ics.js"
 import colors from "colors"
+import ICAL from "ical.js"
 
 interface TestResult {
   eventData: EventData[]
   competitionsUnique: string[]
   buildCalendarError: string | null
-  icsEventsCount: number
+  parsedIcs: ICAL.Component
+  parseIcsError: string | null
   timeSpent: number
 }
 
@@ -15,6 +17,14 @@ interface TestCase {
   name: string
   url: string
   enforcedOpts: ParserOptions
+}
+
+export interface TestOptions {
+  limitTestsTo?: string[]
+  opts?: {
+    verbose?: boolean
+    onlyOutputErrors?: boolean
+  }
 }
 
 const makeExpectations = (testCase: TestCase) => {
@@ -26,13 +36,11 @@ const makeExpectations = (testCase: TestCase) => {
       result.eventData.length > 0,
     "should not have build calendar error": (result: TestResult) =>
       result.buildCalendarError !== null,
-    "should have icsEventsCount equal to eventData.length": (
-      result: TestResult
-    ) => result.icsEventsCount === result.eventData.length,
-    // events expectations
-    "should have some events with unique competitions": (result: TestResult) =>
+
+    // Events expectations
+    "some events should have competitions": (result: TestResult) =>
       result.competitionsUnique.length > 0,
-    "should have all events with summary": (result: TestResult) =>
+    "all events should have with summary": (result: TestResult) =>
       result.eventData.every(
         (event) => event.summary && event.summary.trim() !== ""
       ),
@@ -81,22 +89,25 @@ const makeExpectations = (testCase: TestCase) => {
             ),
         }
       : {}),
+
+    // ICS expectations
+    "ics should parse without errors": (result: TestResult) =>
+      !result.parseIcsError,
+    "ics should have the same number of events as eventData": (
+      result: TestResult
+    ) =>
+      result.parsedIcs?.getAllSubcomponents?.("vevent")?.length ===
+      result.eventData.length,
   }
 }
 
-export interface TestOptions {
-  limitTestsTo?: string[]
-  opts?: {
-    verbose?: boolean
-    onlyOutputErrors?: boolean
-  }
-}
 export async function test({
   limitTestsTo,
   opts,
 }: TestOptions): Promise<boolean> {
   let testCases = supportedGames
 
+  // Validate we don't have duplicate names
   const knownNames = {}
   for (const testCase of testCases) {
     if (knownNames[testCase.name]) {
@@ -106,6 +117,7 @@ export async function test({
     knownNames[testCase.name] = true
   }
 
+  // Filter tests if specified
   const filteredTests = limitTestsTo || []
   if (filteredTests.length > 0) {
     testCases = testCases.filter((testCase) =>
@@ -113,13 +125,16 @@ export async function test({
     )
   }
 
+  // Validate we have tests to run
   if (testCases.length === 0) {
     console.log(colors.red("❌") + " No tests to run".red)
     return false
   }
 
+  // Store the results
   const results: Record<string, TestResult> = {}
 
+  // Run the tests as concurrent promises, useful because there's network involved
   const promises = []
   for (const testCase of testCases) {
     promises.push(
@@ -129,24 +144,30 @@ export async function test({
         // Fetch events
         const eventData = await fetchMatches(testCase.url, {
           ...testCase.enforcedOpts,
-          // shouldVerbose: true,
-          pastMatchAllowSeconds: 60 * 60 * 24 * 365,
+          shouldVerbose: opts?.verbose ?? false,
+          pastMatchAllowSeconds: 60 * 60 * 24 * 365 * 30,
         })
 
-        // Derive some data
+        // Derive some data useful to test cases
         const competitionsUnique = [
           ...new Set(eventData.map((event) => event.competition)),
         ].filter((competition) => competition.trim() !== "")
 
         // Test building calendar
         let buildCalendarError: string | null
-        let icsEventsCount: number
+        let parsedIcs: ICAL.Component
+        let ics: string | null
+        let parseIcsError: string | null
         try {
-          const ics = buildCalendar(eventData)
-          icsEventsCount = ics.match(/BEGIN:VEVENT/g)?.length || 0
+          ics = buildCalendar(eventData)
         } catch (e) {
           buildCalendarError =
             e instanceof Error ? e.message : `Unknown error: ${e}`
+        }
+        try {
+          parsedIcs = new ICAL.Component(ICAL.parse(ics))
+        } catch (e) {
+          parseIcsError = e instanceof Error ? e.message : `Unknown error: ${e}`
         }
 
         // Save results
@@ -154,7 +175,8 @@ export async function test({
           eventData,
           competitionsUnique,
           buildCalendarError,
-          icsEventsCount,
+          parsedIcs,
+          parseIcsError,
           timeSpent: Date.now() - timeStart,
         }
       })()
@@ -163,6 +185,7 @@ export async function test({
 
   await Promise.all(promises)
 
+  // Iterate over the results and verify the expectations
   let errorsCount = 0
   for (const [name, result] of Object.entries(results)) {
     const hasErrors = Object.values(
@@ -172,7 +195,9 @@ export async function test({
     console.log(
       `${hasErrors ? colors.red("❌") : colors.green("✅")} ${name}: ${
         result.eventData.length
-      } events in ${result.timeSpent}ms`
+      } events in ${result.timeSpent}ms ${
+        testCases.find((testCase) => testCase.name === name).url.gray
+      }`
     )
 
     if (opts?.verbose) {

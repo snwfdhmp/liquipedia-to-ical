@@ -34,6 +34,7 @@ interface EventData {
 }
 
 interface SupportedGame {
+  id: string
   name: string
   url: string
   baseUrl: string

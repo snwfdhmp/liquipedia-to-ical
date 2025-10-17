@@ -430,19 +430,24 @@ export const parseEventsFromUrl = async (
   if (!elements) elements = []
 
   // ================ FOR EACH MATCH ================
-  elements.each((index, element) => {
-    try {
-      const eventData = parseMatchFromElement($, element, opts, verbose)
-      if (!eventData) return
-      // ================ CHECK IF EVENT SHOULD BE SELECTED ================
+  try {
+    elements.each((index, element) => {
+      try {
+        const eventData = parseMatchFromElement($, element, opts, verbose)
+        if (!eventData) return
+        // ================ CHECK IF EVENT SHOULD BE SELECTED ================
 
-      events.push(eventData)
-      verbose({ eventData })
-    } catch (e) {
-      console.error(`Error while parsing match from element: ${e}`)
-      return
-    }
-  })
+        events.push(eventData)
+        verbose({ eventData })
+      } catch (e) {
+        console.error(`Error while parsing match from element: ${e}`)
+        return
+      }
+    })
+  } catch (e) {
+    console.error(`Error while parsing matches from ${url}: ${e}`)
+    return []
+  }
 
   setCache(cacheKey, events)
   return events

@@ -1,4 +1,4 @@
-// Import des modules nécessaires
+#!/usr/bin/env tsx
 import axios from "axios"
 import express from "express"
 import { insertTelemetry, updateTelemetry } from "./telemetry.js"
@@ -118,6 +118,11 @@ cachedRouter.get("/preset/:name", async (req: TelemetryRequest, res) => {
   res.send(ics)
 })
 
+/**
+ * Get the options from the query parameters and prefix them if needed
+ *
+ * Prefix allows to handle multiple jobs in the same request by using different indexes
+ */
 const getOptsFromQuery = (
   req: express.Request,
   prefix: string = ""
@@ -148,6 +153,9 @@ const getOptsFromQuery = (
   return opts
 }
 
+/**
+ * Validate the options
+ */
 const validateOpts = (opts: ParserOptions): Error | null => {
   if (!opts.url) {
     return new Error("Missing url query param")
@@ -158,6 +166,9 @@ const validateOpts = (opts: ParserOptions): Error | null => {
   return null
 }
 
+/**
+ * Find the prefixes configured by the user in the query parameters
+ */
 const listPrefixes = (req: express.Request): string[] => {
   const prefixes = []
   if (req.query.url) {
@@ -176,6 +187,13 @@ const listPrefixes = (req: express.Request): string[] => {
   return prefixes
 }
 
+/**
+ * Tries to find the supported game for a given URL
+ *
+ * It suggest autofix candidates for users that have trouble understanding that they cannot use URLS /mygame/myAwesomeTournament/anything.html
+ *
+ * It will provides the supported game URL while the main flow will first test the user URL (in case its valid), and then fallback to those reported here
+ */
 const getUrlCandidates = (url: string): string[] => {
   const candidates = [url]
 
@@ -211,14 +229,17 @@ cachedRouter.get("/matches.ics", async (req, res) => {
           uniqueEvents = events
           hadSuccess = true
           break
-        } catch (error) {}
+        } catch (error) {
+          // if we can't parse any matches from this URL, try the next one
+          continue
+        }
       }
 
       if (!hadSuccess) {
         res
           .status(400)
           .send(
-            "Could not retrieve matches, most probably because the URL is not a Liquipedia match page. Example: https://liquipedia.net/rocketleague/Liquipedia:Matches"
+            "Could not retrieve matches, most probably because the URL is not a Liquipedia match page. Example valid URL: https://liquipedia.net/rocketleague/Liquipedia:Matches"
           )
         return
       }
@@ -246,9 +267,13 @@ cachedRouter.get("/matches.ics", async (req, res) => {
 
 app.use(cachedRouter)
 
+/**
+ * Program entry point, determines what behavior we want to run
+ */
 if (process.argv[2] === "test") {
-  const availablesArgs = process.argv.slice(3)
+  // run the tests
 
+  // parse the arguments
   const testOpts: TestOptions = {
     limitTestsTo: [],
     opts: {
@@ -256,6 +281,7 @@ if (process.argv[2] === "test") {
       onlyOutputErrors: false,
     },
   }
+  const availablesArgs = process.argv.slice(3)
   for (let i = 0; i < availablesArgs.length; i++) {
     const arg = availablesArgs[i]
 
@@ -272,8 +298,11 @@ if (process.argv[2] === "test") {
     }
   }
 
-  await test(testOpts)
+  // finally run the tests
+  const validated = await test(testOpts)
+  process.exit(validated ? 0 : 1)
 } else {
+  // run the server
   const PORT = process.env.PORT || 9059
   app.listen(PORT, () => {
     console.log(`Server started on 0.0.0.0:${PORT}`)

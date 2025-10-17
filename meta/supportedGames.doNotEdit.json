@@ -1,0 +1,405 @@
+{
+  "criticalops": {
+    "id": "criticalops",
+    "name": "Critical Ops",
+    "url": "https://liquipedia.net/criticalops/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/criticalops",
+    "enforcedOpts": {}
+  },
+  "omegastrikers": {
+    "id": "omegastrikers",
+    "name": "Omega Strikers",
+    "url": "https://liquipedia.net/omegastrikers/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/omegastrikers",
+    "enforcedOpts": {}
+  },
+  "arenafps": {
+    "id": "arenafps",
+    "name": "Arena FPS",
+    "url": "https://liquipedia.net/arenafps/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/arenafps",
+    "enforcedOpts": {}
+  },
+  "paladins": {
+    "id": "paladins",
+    "name": "Paladins",
+    "url": "https://liquipedia.net/paladins/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/paladins",
+    "enforcedOpts": {}
+  },
+  "warthunder": {
+    "id": "warthunder",
+    "name": "War Thunder",
+    "url": "https://liquipedia.net/warthunder/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/warthunder",
+    "enforcedOpts": {}
+  },
+  "simracing": {
+    "id": "simracing",
+    "name": "Sim Racing",
+    "url": "https://liquipedia.net/simracing/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/simracing",
+    "enforcedOpts": {
+      "expectMissingTeams": true
+    }
+  },
+  "rematch": {
+    "id": "rematch",
+    "name": "Rematch",
+    "url": "https://liquipedia.net/rematch/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/rematch",
+    "enforcedOpts": {}
+  },
+  "teamfortress": {
+    "id": "teamfortress",
+    "name": "Team Fortress",
+    "url": "https://liquipedia.net/teamfortress/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/teamfortress",
+    "enforcedOpts": {}
+  },
+  "magic": {
+    "id": "magic",
+    "name": "Magic",
+    "url": "https://liquipedia.net/magic/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/magic",
+    "enforcedOpts": {}
+  },
+  "chess": {
+    "id": "chess",
+    "name": "Chess",
+    "url": "https://liquipedia.net/chess/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/chess",
+    "enforcedOpts": {}
+  },
+  "rocketleague": {
+    "id": "rocketleague",
+    "name": "Rocket League",
+    "url": "https://liquipedia.net/rocketleague/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/rocketleague",
+    "enforcedOpts": {}
+  },
+  "pokemon": {
+    "id": "pokemon",
+    "name": "Pokémon",
+    "url": "https://liquipedia.net/pokemon/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/pokemon",
+    "enforcedOpts": {}
+  },
+  "underlords": {
+    "id": "underlords",
+    "name": "Dota Underlords",
+    "url": "https://liquipedia.net/underlords/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/underlords",
+    "enforcedOpts": {
+      "allowMissingTeams": true
+    }
+  },
+  "naraka": {
+    "id": "naraka",
+    "name": "Naraka: Bladepoint",
+    "url": "https://liquipedia.net/naraka/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/naraka",
+    "enforcedOpts": {
+      "allowMissingTeams": true
+    }
+  },
+  "trackmania": {
+    "id": "trackmania",
+    "name": "Trackmania",
+    "url": "https://liquipedia.net/trackmania/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/trackmania",
+    "enforcedOpts": {
+      "allowMissingTeams": true
+    }
+  },
+  "geoguessr": {
+    "id": "geoguessr",
+    "name": "GeoGuessr",
+    "url": "https://liquipedia.net/geoguessr/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/geoguessr",
+    "enforcedOpts": {}
+  },
+  "valorant": {
+    "id": "valorant",
+    "name": "VALORANT",
+    "url": "https://liquipedia.net/valorant/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/valorant",
+    "enforcedOpts": {}
+  },
+  "mobilelegends": {
+    "id": "mobilelegends",
+    "name": "Mobile Legends",
+    "url": "https://liquipedia.net/mobilelegends/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/mobilelegends",
+    "enforcedOpts": {}
+  },
+  "splitgate": {
+    "id": "splitgate",
+    "name": "Splitgate",
+    "url": "https://liquipedia.net/splitgate/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/splitgate",
+    "enforcedOpts": {}
+  },
+  "overwatch": {
+    "id": "overwatch",
+    "name": "Overwatch",
+    "url": "https://liquipedia.net/overwatch/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/overwatch",
+    "enforcedOpts": {}
+  },
+  "deadlock": {
+    "id": "deadlock",
+    "name": "Deadlock",
+    "url": "https://liquipedia.net/deadlock/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/deadlock",
+    "enforcedOpts": {}
+  },
+  "rainbowsix": {
+    "id": "rainbowsix",
+    "name": "Rainbow Six",
+    "url": "https://liquipedia.net/rainbowsix/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/rainbowsix",
+    "enforcedOpts": {}
+  },
+  "pubg": {
+    "id": "pubg",
+    "name": "PUBG",
+    "url": "https://liquipedia.net/pubg/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/pubg",
+    "enforcedOpts": {
+      "expectMissingTeams": true
+    }
+  },
+  "leagueoflegends": {
+    "id": "leagueoflegends",
+    "name": "League of Legends",
+    "url": "https://liquipedia.net/leagueoflegends/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/leagueoflegends",
+    "enforcedOpts": {}
+  },
+  "brawlstars": {
+    "id": "brawlstars",
+    "name": "Brawl Stars",
+    "url": "https://liquipedia.net/brawlstars/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/brawlstars",
+    "enforcedOpts": {}
+  },
+  "tarkovarena": {
+    "id": "tarkovarena",
+    "name": "Tarkov Arena",
+    "url": "https://liquipedia.net/tarkovarena/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/tarkovarena",
+    "enforcedOpts": {}
+  },
+  "freefire": {
+    "id": "freefire",
+    "name": "Free Fire",
+    "url": "https://liquipedia.net/freefire/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/freefire",
+    "enforcedOpts": {}
+  },
+  "tft": {
+    "id": "tft",
+    "name": "Teamfight Tactics",
+    "url": "https://liquipedia.net/tft/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/tft",
+    "enforcedOpts": {
+      "allowMissingTeams": true
+    }
+  },
+  "callofduty": {
+    "id": "callofduty",
+    "name": "Call of Duty",
+    "url": "https://liquipedia.net/callofduty/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/callofduty",
+    "enforcedOpts": {}
+  },
+  "clashofclans": {
+    "id": "clashofclans",
+    "name": "Clash of Clans",
+    "url": "https://liquipedia.net/clashofclans/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/clashofclans",
+    "enforcedOpts": {}
+  },
+  "tetris": {
+    "id": "tetris",
+    "name": "Tetris",
+    "url": "https://liquipedia.net/tetris/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/tetris",
+    "enforcedOpts": {}
+  },
+  "autochess": {
+    "id": "autochess",
+    "name": "Autochess",
+    "url": "https://liquipedia.net/autochess/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/autochess",
+    "enforcedOpts": {
+      "allowMissingTeams": true
+    }
+  },
+  "heroes": {
+    "id": "heroes",
+    "name": "Heroes",
+    "url": "https://liquipedia.net/heroes/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/heroes",
+    "enforcedOpts": {}
+  },
+  "halo": {
+    "id": "halo",
+    "name": "Halo",
+    "url": "https://liquipedia.net/halo/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/halo",
+    "enforcedOpts": {}
+  },
+  "hearthstone": {
+    "id": "hearthstone",
+    "name": "Hearthstone",
+    "url": "https://liquipedia.net/hearthstone/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/hearthstone",
+    "enforcedOpts": {}
+  },
+  "easportsfc": {
+    "id": "easportsfc",
+    "name": "EA SPORTS FC",
+    "url": "https://liquipedia.net/easportsfc/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/easportsfc",
+    "enforcedOpts": {}
+  },
+  "splatoon": {
+    "id": "splatoon",
+    "name": "Splatoon",
+    "url": "https://liquipedia.net/splatoon/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/splatoon",
+    "enforcedOpts": {}
+  },
+  "smite": {
+    "id": "smite",
+    "name": "SMITE",
+    "url": "https://liquipedia.net/smite/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/smite",
+    "enforcedOpts": {}
+  },
+  "wildrift": {
+    "id": "wildrift",
+    "name": "Wild Rift",
+    "url": "https://liquipedia.net/wildrift/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/wildrift",
+    "enforcedOpts": {}
+  },
+  "clashroyale": {
+    "id": "clashroyale",
+    "name": "Clash Royale",
+    "url": "https://liquipedia.net/clashroyale/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/clashroyale",
+    "enforcedOpts": {}
+  },
+  "worldoftanks": {
+    "id": "worldoftanks",
+    "name": "World of Tanks",
+    "url": "https://liquipedia.net/worldoftanks/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/worldoftanks",
+    "enforcedOpts": {}
+  },
+  "counterstrike": {
+    "id": "counterstrike",
+    "name": "Counter-Strike",
+    "url": "https://liquipedia.net/counterstrike/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/counterstrike",
+    "enforcedOpts": {}
+  },
+  "zula": {
+    "id": "zula",
+    "name": "Zula",
+    "url": "https://liquipedia.net/zula/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/zula",
+    "enforcedOpts": {}
+  },
+  "osu": {
+    "id": "osu",
+    "name": "osu!",
+    "url": "https://liquipedia.net/osu/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/osu",
+    "enforcedOpts": {}
+  },
+  "pubgmobile": {
+    "id": "pubgmobile",
+    "name": "PUBG Mobile",
+    "url": "https://liquipedia.net/pubgmobile/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/pubgmobile",
+    "enforcedOpts": {
+      "expectMissingTeams": true
+    }
+  },
+  "honorofkings": {
+    "id": "honorofkings",
+    "name": "Honor of Kings",
+    "url": "https://liquipedia.net/honorofkings/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/honorofkings",
+    "enforcedOpts": {}
+  },
+  "marvelrivals": {
+    "id": "marvelrivals",
+    "name": "Marvel Rivals",
+    "url": "https://liquipedia.net/marvelrivals/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/marvelrivals",
+    "enforcedOpts": {}
+  },
+  "crossfire": {
+    "id": "crossfire",
+    "name": "CrossFire",
+    "url": "https://liquipedia.net/crossfire/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/crossfire",
+    "enforcedOpts": {}
+  },
+  "warcraft": {
+    "id": "warcraft",
+    "name": "Warcraft",
+    "url": "https://liquipedia.net/warcraft/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/warcraft",
+    "enforcedOpts": {}
+  },
+  "dota2": {
+    "id": "dota2",
+    "name": "Dota 2",
+    "url": "https://liquipedia.net/dota2/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/dota2",
+    "enforcedOpts": {}
+  },
+  "apexlegends": {
+    "id": "apexlegends",
+    "name": "Apex Legends",
+    "url": "https://liquipedia.net/apexlegends/Liquipedia:Matches",
+    "baseUrl": "https://liquipedia.net/apexlegends",
+    "enforcedOpts": {
+      "expectMissingTeams": true
+    }
+  },
+  "worldofwarcraft": {
+    "id": "worldofwarcraft",
+    "name": "World of Warcraft",
+    "url": "https://liquipedia.net/worldofwarcraft/Liquipedia:Upcoming_and_ongoing_matches",
+    "baseUrl": "https://liquipedia.net/worldofwarcraft",
+    "enforcedOpts": {}
+  },
+  "starcraft": {
+    "id": "starcraft",
+    "name": "StarCraft",
+    "url": "https://liquipedia.net/starcraft/Liquipedia:Upcoming_and_ongoing_matches",
+    "baseUrl": "https://liquipedia.net/starcraft",
+    "enforcedOpts": {}
+  },
+  "starcraft2": {
+    "id": "starcraft2",
+    "name": "StarCraft II",
+    "url": "https://liquipedia.net/starcraft2/Liquipedia:Upcoming_and_ongoing_matches",
+    "baseUrl": "https://liquipedia.net/starcraft2",
+    "enforcedOpts": {}
+  },
+  "ageofempires": {
+    "id": "ageofempires",
+    "name": "Age of Empires",
+    "url": "https://liquipedia.net/ageofempires/Liquipedia:Upcoming_and_ongoing_matches",
+    "baseUrl": "https://liquipedia.net/ageofempires",
+    "enforcedOpts": {}
+  }
+}

@@ -1,7 +1,11 @@
 import axios, { AxiosInstance, AxiosProxyConfig } from "axios"
 import dotenv from "dotenv"
+import axiosRetry from "axios-retry"
+patchAxiosWithRetryLogic(axios)
 
-dotenv.config()
+dotenv.config({
+  path: new URL("../.env", import.meta.url).pathname,
+})
 
 /**
  * Fetch proxies from the proxy fetch URL
@@ -11,9 +15,13 @@ dotenv.config()
  * Proxies should be formatted as "host:port:username:password"
  */
 export async function getProxies(): Promise<string[]> {
-  const response = await fetch(process.env.PROXY_FETCH_URL)
-  const data = await response.text()
-  return data.split("\n").filter((line) => line.length > 0)
+  try {
+    const response = await axios.get(process.env.PROXY_FETCH_URL)
+    return response.data.split("\n").filter((line) => line.length > 0)
+  } catch (error) {
+    console.error("Error while fetching proxies from proxy fetch URL", error)
+    return null
+  }
 }
 
 /**
@@ -21,7 +29,7 @@ export async function getProxies(): Promise<string[]> {
  *
  * @param proxy proxy string in the format "host:port:username:password"
  */
-export function toAxiosObject(proxy: string): AxiosProxyConfig {
+function toAxiosObject(proxy: string): AxiosProxyConfig {
   return {
     host: proxy.split(":")[0],
     port: parseInt(proxy.split(":")[1]),
@@ -34,30 +42,47 @@ export function toAxiosObject(proxy: string): AxiosProxyConfig {
 
 let axiosInstances: AxiosInstance[] = []
 
+const createAxiosInstance = (proxy?: string) => {
+  const instance = axios.create({
+    proxy: proxy
+      ? {
+          ...toAxiosObject(proxy),
+          protocol: "http",
+        }
+      : undefined,
+  })
+  patchAxiosWithRetryLogic(instance)
+  return instance
+}
+
+let axiosInstancesPromise: Promise<void> | null = null
 /**
  * Initialize axios instances
  *
  * Create a default axios instance without proxy
  * Create axios instances for each proxy
  */
-async function initAxiosInstances() {
-  axiosInstances = []
-  axiosInstances.push(
-    axios.create() // default axios instance without proxy
-  )
-  const proxies = await getProxies()
-  for (const proxy of proxies) {
-    console.log(`Creating axios instance with proxy ${proxy}`)
-    axiosInstances.push(
-      axios.create({
-        proxy: {
-          ...toAxiosObject(proxy),
-          protocol: "http",
-        },
-      })
-    )
+async function initAxiosInstances(): Promise<void> {
+  if (axiosInstancesPromise) {
+    return axiosInstancesPromise
   }
-  console.log(`Created ${axiosInstances.length} axios instances`)
+  axiosInstancesPromise = new Promise(async (resolve, reject) => {
+    axiosInstances = []
+    const proxies = await getProxies()
+
+    if (!proxies || proxies.length === 0) {
+      axiosInstances.push(
+        createAxiosInstance() // default axios instance without proxy
+      )
+    }
+    for (const proxy of proxies) {
+      console.log(`Creating axios instance with proxy ${proxy}`)
+      axiosInstances.push(createAxiosInstance(proxy))
+    }
+    console.log(`Created ${axiosInstances.length} axios instances`)
+    resolve()
+  })
+  await axiosInstancesPromise
 }
 
 let nextAxiosInstanceIndex: number | null = null
@@ -77,4 +102,13 @@ export async function getRandomAxios(): Promise<AxiosInstance> {
       (nextAxiosInstanceIndex + 1) % axiosInstances.length
   }
   return axiosInstances[nextAxiosInstanceIndex]
+}
+
+function patchAxiosWithRetryLogic(instance: AxiosInstance) {
+  axiosRetry(instance, {
+    retries: 5,
+    retryDelay: (retryCount) => {
+      return retryCount * 1000
+    },
+  })
 }
