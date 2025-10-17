@@ -61,6 +61,8 @@ let axiosInstancesPromise: Promise<void> | null = null
  *
  * Create a default axios instance without proxy
  * Create axios instances for each proxy
+ *
+ * If it is called multiple times, it will return the promise of the first call to avoid duplicate initialization (helps with concurrency)
  */
 async function initAxiosInstances(): Promise<void> {
   if (axiosInstancesPromise) {
