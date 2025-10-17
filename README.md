@@ -161,12 +161,11 @@ The service supports **50+ esports titles** including:
 
 ### Prerequisites
 - Node.js 18+
-- pnpm (recommended) or npm
 
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/snwfdhmp/liquipedia-cal.git
+git clone https://github.com/snwfdhmp/liquipedia-to-ical.git
 cd liquipedia-cal
 
 # Install dependencies
