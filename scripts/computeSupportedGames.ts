@@ -126,7 +126,7 @@ for (const { id, name } of gameBaseData) {
       }
 
       deepSet(supportedGame, supportedGamesOverload[id] || {})
-      supportedGames[id] = supportedGame
+      supportedGames.push(supportedGame)
 
       console.log(`${id.bold}: added to supported games`.green)
     })()
@@ -135,6 +135,9 @@ for (const { id, name } of gameBaseData) {
 
 await Promise.all(promises)
 
+supportedGames.sort((a, b) => a.name.localeCompare(b.name))
+
+const __dirname = new URL(".", import.meta.url).pathname
 const DATA_FILE = path.resolve(
   __dirname,
   "..",
@@ -142,3 +145,13 @@ const DATA_FILE = path.resolve(
   "supportedGames.doNotEdit.json"
 )
 fs.writeFileSync(DATA_FILE, JSON.stringify(supportedGames, null, 2))
+
+const DOC_FILE = path.resolve(__dirname, "..", "meta", "supportedGames.md")
+fs.writeFileSync(
+  DOC_FILE,
+  `
+# Supported Games
+
+${supportedGames.map((game) => `- ${game.name}`).join("\n")}
+`
+)

@@ -1,0 +1,58 @@
+
+# Supported Games
+
+- Age of Empires
+- Apex Legends
+- Arena FPS
+- Autochess
+- Brawl Stars
+- Call of Duty
+- Chess
+- Clash of Clans
+- Clash Royale
+- Counter-Strike
+- Critical Ops
+- CrossFire
+- Deadlock
+- Dota 2
+- Dota Underlords
+- EA SPORTS FC
+- Free Fire
+- GeoGuessr
+- Halo
+- Hearthstone
+- Heroes
+- Honor of Kings
+- League of Legends
+- Magic
+- Marvel Rivals
+- Mobile Legends
+- Naraka: Bladepoint
+- Omega Strikers
+- osu!
+- Overwatch
+- Paladins
+- Pokémon
+- PUBG
+- PUBG Mobile
+- Rainbow Six
+- Rematch
+- Rocket League
+- Sim Racing
+- SMITE
+- Splatoon
+- Splitgate
+- StarCraft
+- StarCraft II
+- Tarkov Arena
+- Team Fortress
+- Teamfight Tactics
+- Tetris
+- Trackmania
+- VALORANT
+- War Thunder
+- Warcraft
+- Wild Rift
+- World of Tanks
+- World of Warcraft
+- Zula

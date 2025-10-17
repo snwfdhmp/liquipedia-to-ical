@@ -111,7 +111,7 @@ The service supports **50+ esports titles** including:
 - Arena of Valor
 - And many more...
 
-[View complete list of supported games](https://ics.snwfdhmp.com)
+[View complete list of supported games](meta/supportedGames.md)
 
 ## 🛠️ Installation & Development
 
