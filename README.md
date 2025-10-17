@@ -1,8 +1,12 @@
 # 📅 Liquipedia Calendar - Sync Esports Matches to Your Calendar
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-brightgreen.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue.svg)](https://www.typescriptlang.org/)
+[![Live Service](https://img.shields.io/badge/Live%20Service-ics.snwfdhmp.com-brightgreen.svg)](https://ics.snwfdhmp.com)
+[![GitHub stars](https://img.shields.io/github/stars/snwfdhmp/liquipedia-cal.svg?style=social&label=Star)](https://github.com/snwfdhmp/liquipedia-cal)
+[![GitHub issues](https://img.shields.io/github/issues/snwfdhmp/liquipedia-cal.svg)](https://github.com/snwfdhmp/liquipedia-cal/issues)
+
 
 **Automatically sync esports matches from Liquipedia to your calendar** with customizable filters for competitions and teams. Works with Google Calendar, Apple Calendar, Outlook, and any calendar application that supports iCal/ICS feeds.
 
@@ -21,21 +25,21 @@
 
 ## 🚀 Quick Start
 
-### Option 1: Use the Web Interface (Recommended)
+### Option 1: Use the Web Interface _(For non-devs)_
 
 1. Visit [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
 2. Select your game and customize filters
 3. Click "📅 Add to Calendar" or copy the generated URL
 4. Import into your calendar application
 
-### Option 2: Direct API Usage
+### Option 2: Direct API Usage **(Recommended)**
 
 Generate calendar URLs using this format:
 ```
 https://ics.snwfdhmp.com/matches.ics?url=LIQUIPEDIA_URL&[OPTIONS]
 ```
 
-**Example**: Rocket League RLCS matches
+**Example**: Rocket League RLCS matches from the RLCS series
 ```
 https://ics.snwfdhmp.com/matches.ics?url=https%3A%2F%2Fliquipedia.net%2Frocketleague%2FLiquipedia%3AMatches&competition_regex=RLCS
 ```
@@ -53,11 +57,13 @@ Available presets:
 - `rlcs-major` - RLCS Major tournaments
 - `rocket-league` - All Rocket League matches
 
+> If you want to add your preset, feel free to update [the preset file](src/presets.ts)
+
 ## 📖 API Documentation
 
 ### Base Endpoint
 ```
-GET /matches.ics
+GET /matches.ics[?opts]
 ```
 
 ### Query Parameters
@@ -77,8 +83,15 @@ GET /matches.ics
 
 Combine multiple Liquipedia pages in one calendar:
 ```
-/matches.ics?url=URL1&1_url=URL2&1_competition_regex=PATTERN2
+/matches.ics
+    ?1_url=URL1
+    &2_url=URL2
+    &2_competition_regex=PATTERN_FOR_2
+    &3_url=URL3
+    &3_teams_regex=PATTERN_FOR_3
 ```
+
+It will merge events from the 3 configurations
 
 ### Preset Endpoint
 ```
@@ -106,19 +119,17 @@ The service supports **50+ esports titles** including:
 
 ### Common Issues
 
-**Calendar not updating?**
-- Check if your calendar app supports automatic refresh
-- Try removing and re-adding the calendar subscription
 
 **No matches found?**
 - Verify the Liquipedia URL is correct
 - Check if the game has upcoming matches
 - Try broader filter criteria
-
-**Matches missing?**
-- Some games use different page formats
-- Check the supported games list
+- For Battle Royale and games whose events do not advertise as "Team A vs Team B", use `allow_missing_teams=true`
 - Open an issue if a supported game isn't working
+
+**Calendar not updating?**
+- Check if your calendar app supports automatic refresh
+- Try removing and re-adding the calendar subscription
 
 ### Getting Help
 
@@ -183,4 +194,4 @@ export const presets: Record<string, string[]> = {
 
 *Star ⭐ this repository if you find it useful!*
 
-*[Sponsoring](https://github.com/sponsors/snwfdhmp) helps me spending time on this!*
+*[❤️ Sponsoring](https://github.com/sponsors/snwfdhmp) helps me spending time on this and paying for the servers!*
