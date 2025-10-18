@@ -8,7 +8,9 @@
 [![GitHub issues](https://img.shields.io/github/issues/snwfdhmp/liquipedia-cal.svg)](https://github.com/snwfdhmp/liquipedia-cal/issues)
 
 
-<img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="70%">
+<img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="484"> <a href="https://esports-calendar.snwfdhmp.com">
+<img width="400" height="1100" alt="image" src="https://github.com/user-attachments/assets/80630a6c-d27d-4447-b0a6-c85d8a969f87" />
+</a>
 
 **Automatically sync esports matches from Liquipedia to your calendar** with customizable filters for competitions and teams. Works with Google Calendar, Apple Calendar, Outlook, and any calendar application that supports iCal/ICS feeds.
 
@@ -28,6 +30,10 @@ Consider giving it a ⭐️ if you like it to show your support!
 ## 🚀 Quick Start
 
 ### Option 1: Use the Web Interface _(For non-devs)_
+
+<a href="https://esports-calendar.snwfdhmp.com">
+<img width="700" height="1100" alt="image" src="https://github.com/user-attachments/assets/80630a6c-d27d-4447-b0a6-c85d8a969f87" />
+</a>
 
 1. Visit [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
 2. Select your game and customize filters
