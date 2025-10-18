@@ -6,7 +6,7 @@ import { presets } from "./presets.js"
 import { fetchMatches } from "./fetch.js"
 import { getCache, setCache } from "./cache.js"
 import { buildCalendar, mergeIcs } from "./ics.js"
-import { test, TestOptions } from "./test.js"
+import { test, type TestOptions } from "./test.js"
 import { supportedGames } from "../meta/supportedGames.js"
 
 const __dirname = new URL(".", import.meta.url).pathname
@@ -43,11 +43,7 @@ app.use((req, res, next) => {
 })
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/url_builder.html")
-})
-
-app.get("/favicon.ico", (req, res) => {
-  res.sendFile(__dirname + "/favicon.ico")
+  res.redirect("https://esports-calendar.snwfdhmp.com/")
 })
 
 const cachedRouter = express.Router()
