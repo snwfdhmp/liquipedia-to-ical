@@ -10,10 +10,9 @@
 
 <img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="70%">
 
+Consider giving it a ⭐️ if you like it to show your support!
 
 **Automatically sync esports matches from Liquipedia to your calendar** with customizable filters for competitions and teams. Works with Google Calendar, Apple Calendar, Outlook, and any calendar application that supports iCal/ICS feeds.
-
-🌐 **Live Service**: [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
 
 ## ✨ Features
 
