@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+body {
+  font-family: monospace;
+  background-color: #FFFFFF;
+  color: #000;
+  margin: 0;
+}
+
+h1 {
+  @apply text-2xl font-bold;
+}
+
+h2 {
+  @apply text-xl font-bold;
+}
+
+h3 {
+  @apply text-lg font-bold;
+}
+
+.sponsor-blink {
+  animation: sponsor-blink 1s infinite;
+  animation-duration: 60s;
+}
+
+@keyframes sponsor-blink {
+  0% {
+    opacity: 1;
+  }
+  1% {
+    opacity: 0.3;
+  }
+  2% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}

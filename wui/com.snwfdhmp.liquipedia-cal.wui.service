@@ -1,0 +1,13 @@
+[Unit]
+Description=com.snwfdhmp.liquipedia-cal.wui
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/github.com/snwfdhmp/liquipedia-cal/wui
+ExecStart=/usr/local/bin/pnpm serve
+Restart=on-failure
+RestartSec=10
+SyslogIdentifier=com.snwfdhmp.liquipedia-cal.wui
+
+[Install]
+WantedBy=multi-user.target

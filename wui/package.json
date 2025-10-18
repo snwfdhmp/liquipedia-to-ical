@@ -1,0 +1,46 @@
+{
+  "name": "wui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "serve": "serve -n -s dist -l 9089",
+    "restart-service": "sudo systemctl restart com.snwfdhmp.liquipedia-cal.wui.service",
+    "deploy": "pnpm run build && pnpm run restart-service"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/react-query": "^5.90.5",
+    "clsx": "^2.1.1",
+    "path": "^0.12.7",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.8.0",
+    "serve": "^14.2.5",
+    "ts-ics": "^2.4.0"
+  },
+  "prettier": {
+    "semi": false,
+    "tabWidth": 2
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "tailwindcss": "^4.1.11",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2"
+  }
+}
