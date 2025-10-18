@@ -243,6 +243,27 @@ const getCompetition = ($, element): string => {
   return ""
 }
 
+const getCompetitionUrl = ($, element): string | null => {
+  let competitionUrl = tryMultipleSelectors(
+    (selector) => $(element).find(selector),
+    [
+      ".match-tournament a",
+      ".match-info-tournament a",
+      ".tournament-text-flex a",
+      ".match-filler > div:nth-child(1) > div:nth-child(2) a",
+    ]
+  )
+  if (competitionUrl) {
+    let competitionUrlHref = competitionUrl.attr("href")
+    if (competitionUrlHref && competitionUrlHref.startsWith("/")) {
+      competitionUrlHref = "https://liquipedia.net" + competitionUrlHref
+    }
+    return competitionUrlHref
+  }
+
+  return null
+}
+
 const getDescriptors = (
   $,
   element
@@ -350,6 +371,8 @@ const parseMatchFromElement = (
   let team2Url = getTeamUrl($, element, false)
 
   let competition = getCompetition($, element)
+  let competitionUrl = getCompetitionUrl($, element)
+
   let { descriptor, descriptorMoreInfo } = getDescriptors($, element)
 
   let winnerSide = getWinnerSide($, element)
@@ -391,6 +414,7 @@ const parseMatchFromElement = (
     team1Logo,
     team2Logo,
     competition,
+    competitionUrl,
     summary,
     description,
     winnerSide,

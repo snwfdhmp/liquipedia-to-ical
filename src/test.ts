@@ -40,6 +40,11 @@ const makeExpectations = (testCase: TestCase) => {
     // Events expectations
     "some events should have competitions": (result: TestResult) =>
       result.competitionsUnique.length > 0,
+
+    "some events should have competitionUrls": (result: TestResult) =>
+      result.eventData.some(
+        (event) => event.competitionUrl && event.competitionUrl.trim() !== ""
+      ),
     "all events should have with summary": (result: TestResult) =>
       result.eventData.every(
         (event) => event.summary && event.summary.trim() !== ""

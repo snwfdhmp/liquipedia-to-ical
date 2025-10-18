@@ -18,6 +18,7 @@ const timestampToIcs = (timestamp: number) => {
 export const buildCalendar = (events: EventData[]) => {
   const optionalData = {
     "X-LIQUIPEDIATOICAL-COMPETITION": "competition",
+    "X-LIQUIPEDIATOICAL-COMPETITIONURL": "competitionUrl",
     "X-LIQUIPEDIATOICAL-TEAMLEFT": "team1",
     "X-LIQUIPEDIATOICAL-TEAMLEFTFULLNAME": "team1fullName",
     "X-LIQUIPEDIATOICAL-TEAMLEFTURL": "team1Url",
