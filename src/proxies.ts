@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosProxyConfig } from "axios"
+import axios, { type AxiosInstance, type AxiosProxyConfig } from "axios"
 import dotenv from "dotenv"
 import axiosRetry from "axios-retry"
 patchAxiosWithRetryLogic(axios)
