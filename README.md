@@ -27,6 +27,8 @@ Consider giving it a ⭐️ if you like it to show your support!
 
 ### What you get
 
+<img width="400" height="282" alt="image" src="https://github.com/user-attachments/assets/f59fd63c-2d47-40fa-a462-336eb84110a0" />
+
 - Event summary contains:
   - teams **short names (eg: VIT vs KC)**
   - competition name
