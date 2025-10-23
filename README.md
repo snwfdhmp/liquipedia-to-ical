@@ -17,6 +17,7 @@ Consider giving it a ⭐️ if you like it to show your support!
 ## 📚 Table of Contents
 
 - [✨ Features](#-features)
+  - [What does this do?](#list-of-features)
   - [What you get](#what-you-get)
   - [Additional iCal tags](#additional-ical-tags)
 - [🚀 Quick Start](#-quick-start)
@@ -39,6 +40,8 @@ Consider giving it a ⭐️ if you like it to show your support!
   - [Custom Presets](#custom-presets)
 
 ## ✨ Features
+
+### What does this do?
 
 - 🎮 **50+ Supported Games**: Rocket League, League of Legends, CS2, Valorant, Dota 2, Overwatch, and many more
 - 📱 **Universal Compatibility**: Works with Google Calendar, Apple Calendar, Outlook, iOS, Android
