@@ -25,6 +25,38 @@ Consider giving it a ⭐️ if you like it to show your support!
 - 📊 **Built-in Analytics**: Track usage and performance metrics
 - 🌐 **Web Interface**: User-friendly URL builder with live preview
 
+### What you get
+
+- Event summary contains:
+  - teams **short names (eg: VIT vs KC)**
+  - competition name
+  - type of match (eg: Bo3) if available
+  - score if the match already started
+- Event details contains:
+  - team **full names (eg: Vitality vs Karmine Corp)**
+  - competition name
+  - type of match (eg: Bo3) if available
+  - score if the match already started
+
+### Additional iCal tags
+
+The event ICS also contains some useful custom iCal tags for scripting or custom integrations.
+
+|name|example|
+|---|---|
+|X-LIQUIPEDIATOICAL-COMPETITION|RLCS Worlds 2025|
+|X-LIQUIPEDIATOICAL-TEAMLEFT|KC|
+|X-LIQUIPEDIATOICAL-TEAMLEFTFULLNAME|Karmine Corp|
+|X-LIQUIPEDIATOICAL-TEAMLEFTURL|https://liquipedia.net/rocketleague/Karmine_Corp|
+|X-LIQUIPEDIATOICAL-TEAMLEFTLOGO|https://liquipedia.net/commons/images/thumb/1/1e/Karmine_Corp_2020_lightmode.png/600px-Karmine_Corp_2020_lightmode.png|
+|X-LIQUIPEDIATOICAL-TEAMRIGHT|G2|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTFULLNAME|G2 Esports|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTURL|https://liquipedia.net/rocketleague/G2_Esports|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTLOGO|https://liquipedia.net/commons/images/thumb/d/da/G2_Esports_2020_lightmode.png/600px-G2_Esports_2020_lightmode.png|
+|X-LIQUIPEDIATOICAL-WINNERSIDE|left|
+|X-LIQUIPEDIATOICAL-DESCRIPTOR|Grand Final|
+|X-LIQUIPEDIATOICAL-DESCRIPTORMOREINFO|...|
+
 ## 🚀 Quick Start
 
 ### Option 1: Use the Web Interface _(For non-devs)_
@@ -142,23 +174,6 @@ The service supports **50+ esports titles** including:
 - 📝 [Open an issue](https://github.com/snwfdhmp/liquipedia-cal/issues) on GitHub
 - 💬 Contact on Discord: `mjo___`
 - 🌐 Test your URL at [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
-
-## Additional iCal tags
-
-|name|example|
-|---|---|
-|X-LIQUIPEDIATOICAL-COMPETITION|RLCS Worlds 2025|
-|X-LIQUIPEDIATOICAL-TEAMLEFT|KC|
-|X-LIQUIPEDIATOICAL-TEAMLEFTFULLNAME|Karmine Corp|
-|X-LIQUIPEDIATOICAL-TEAMLEFTURL|https://liquipedia.net/rocketleague/Karmine_Corp|
-|X-LIQUIPEDIATOICAL-TEAMLEFTLOGO|https://liquipedia.net/commons/images/thumb/1/1e/Karmine_Corp_2020_lightmode.png/600px-Karmine_Corp_2020_lightmode.png|
-|X-LIQUIPEDIATOICAL-TEAMRIGHT|G2|
-|X-LIQUIPEDIATOICAL-TEAMRIGHTFULLNAME|G2 Esports|
-|X-LIQUIPEDIATOICAL-TEAMRIGHTURL|https://liquipedia.net/rocketleague/G2_Esports|
-|X-LIQUIPEDIATOICAL-TEAMRIGHTLOGO|https://liquipedia.net/commons/images/thumb/d/da/G2_Esports_2020_lightmode.png/600px-G2_Esports_2020_lightmode.png|
-|X-LIQUIPEDIATOICAL-WINNERSIDE|left|
-|X-LIQUIPEDIATOICAL-DESCRIPTOR|Grand Final|
-|X-LIQUIPEDIATOICAL-DESCRIPTORMOREINFO|...|
 
 ## 🛠️ Contributing
 
