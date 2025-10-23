@@ -207,7 +207,9 @@ The service supports **50+ esports titles** including:
 ## 🛠️ Contributing
 
 ### Prerequisites
-- Node.js 18+
+
+- Node.js
+- pnpm
 
 ### Setup
 ```bash
@@ -226,6 +228,8 @@ pnpm run test
 ```
 
 ## 🧪 Testing
+
+### How to run the tests
 
 The project includes comprehensive testing for all supported games:
 
