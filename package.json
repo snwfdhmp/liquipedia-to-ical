@@ -8,6 +8,7 @@
     "semi": false
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.2",
     "axios": "^1.12.2",
     "axios-retry": "^4.5.0",
     "cheerio": "^1.1.2",
@@ -18,7 +19,8 @@
     "node-fetch": "^2.7.0",
     "puppeteer": "^23.11.1",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^24.9.1",
