@@ -7,8 +7,6 @@ import mcpApi from "./mcp.js"
  * Program entry point, determines what behavior we want to run
  */
 if (process.argv[2] === "test") {
-  // run the tests
-
   // parse the arguments
   const testOpts: TestOptions = {
     limitTestsTo: [],
@@ -34,7 +32,7 @@ if (process.argv[2] === "test") {
     }
   }
 
-  // finally run the tests
+  // run the tests
   const validated = await test(testOpts)
   process.exit(validated ? 0 : 1)
 } else {
