@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio"
 import { getRandomAxios } from "./proxies.js"
 import { getCache, setCache } from "./cache.js"
+import { ParserOptions, EventData } from "./types.js"
 
 const tryMultipleSelectors = (findFunc, selectors) => {
   for (const selector of selectors) {
@@ -138,6 +139,18 @@ const getTeamLogo = ($, element, isTeam1: boolean) => {
   }
 }
 
+const unwrapString = (str: string | null) => {
+  if (!str) return str
+  const charsets = ["()", "{}", "[]"]
+  for (const charset of charsets) {
+    const [start, end] = charset.split("")
+    if (str.startsWith(start) && str.endsWith(end)) {
+      return str.slice(1, -1)
+    }
+  }
+  return str
+}
+
 const makeSummary = (
   team1: string,
   team2: string,
@@ -171,7 +184,7 @@ const makeDescription = (
     description += `${team1} vs ${team2} `
   }
   if (descriptor) {
-    description += `(${descriptorMoreInfo || descriptor}) `
+    descriptor += `(${descriptorMoreInfo || descriptor}) `
   }
   if (competition) {
     description += `[${competition}]`
@@ -227,7 +240,7 @@ const getCompetition = ($, element): string => {
   if (competitionEl.length !== 0) {
     competitionEl.find(".match-countdown").remove()
     competition = competitionEl.text().trim()
-    return competition
+    return unwrapString(competition)
   }
 
   // second method
@@ -237,7 +250,7 @@ const getCompetition = ($, element): string => {
   )
   if (competitionEl) {
     competition = competitionEl.text().trim()
-    return competition
+    return unwrapString(competition)
   }
 
   return ""
@@ -270,7 +283,13 @@ const getDescriptors = (
 ): { descriptor: string; descriptorMoreInfo: string } => {
   const cleanupDescriptor = (descriptor: string) => {
     if (!descriptor) return descriptor
-    return descriptor.replace(/\s*vs\s*/g, "")
+    descriptor = unwrapString(descriptor.replace(/\s*vs\s*/g, ""))
+
+    // get rid of kind-of empty strings (ie: only whats in the array)
+    if (!descriptor || [".", "-", "vs", "vs.", "versus"].includes(descriptor)) {
+      return null
+    }
+    return descriptor
   }
 
   const versus = $(element).find(".versus")
@@ -446,6 +465,8 @@ export const parseEventsFromUrl = async (
 
   const events = []
   const proxyAxios = await getRandomAxios()
+
+  // @ts-ignore
   const $ = cheerio.load((await proxyAxios.get(url)).data)
 
   // the different selectors to try, depends on page layout
