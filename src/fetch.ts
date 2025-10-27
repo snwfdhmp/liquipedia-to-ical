@@ -1,5 +1,7 @@
 import { parseEventsFromUrl } from "./parse.js"
 
+import { EventData, ParserOptions } from "./types.js"
+
 const competitionMatches = (event, regex) => {
   const regexExtended = new RegExp(regex, "i")
   if (!event.competition.match(regexExtended)) return false

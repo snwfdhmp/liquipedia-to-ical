@@ -1,3 +1,5 @@
+import { ParserOptions } from "../src/types.js"
+
 export interface ApiOption {
   kind: "string" | "boolean" | "number"
   title: string

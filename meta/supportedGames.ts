@@ -2,6 +2,7 @@
  * Import the generated list of supported games
  */
 import supportedGamesData from "./supportedGames.doNotEdit.json" with { type: "json" }
+import { SupportedGame } from "../src/types.js"
 
 /**
  * Contains a list of supported games that are tested and supported by the service.

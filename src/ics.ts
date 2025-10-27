@@ -1,3 +1,5 @@
+import { EventData } from "./types.js"
+
 const timestampToIcs = (timestamp: number) => {
   const date = new Date(timestamp * 1000)
 

@@ -1,3 +1,5 @@
+import { SupportedGame } from "../src/types.js"
+
 /**
  * Those are disabled because they are broken in Liquipedia
  */

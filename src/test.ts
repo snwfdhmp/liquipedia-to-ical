@@ -3,6 +3,8 @@ import { fetchMatches } from "./fetch.js"
 import { buildCalendar } from "./ics.js"
 import colors from "colors"
 import ICAL from "ical.js"
+import { ParserOptions } from "./types.js"
+import { EventData } from "./types.js"
 
 interface TestResult {
   eventData: EventData[]
