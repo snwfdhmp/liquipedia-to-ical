@@ -16,77 +16,43 @@ Consider giving it a ⭐️ if you like it to show your support!
 
 ## 📚 Table of Contents
 
-- [✨ Features](#-features)
+- [Features](#features)
   - [What does this do?](#list-of-features)
-  - [What you get](#what-you-get)
-  - [Additional iCal tags](#additional-ical-tags)
-- [🚀 Quick Start](#-quick-start)
+- [Quick Start](#quick-start)
   - [Option 1: Use the Web Interface](#option-1-use-the-web-interface-for-non-devs)
   - [Option 2: Direct API Usage](#option-2-direct-api-usage-recommended)
   - [Option 3: Use Presets](#option-3-use-presets)
-- [📖 API Documentation](#-api-documentation)
+- [What you get](#what-you-get)
+  - [Additional iCal tags](#additional-ical-tags)
+- [API Documentation](#api-documentation)
+  - [Additional iCal tags](#additional-ical-tags)
   - [Base Endpoint](#base-endpoint)
   - [Query Parameters](#query-parameters)
   - [Multiple URL Support](#multiple-url-support)
   - [Preset Endpoint](#preset-endpoint)
-- [🎮 Supported Games](#-supported-games)
-- [🐛 Troubleshooting](#-troubleshooting)
+- [Supported Games](#supported-games)
+- [Troubleshooting](#troubleshooting)
   - [Common Issues](#common-issues)
   - [Getting Help](#getting-help)
-- [🛠️ Contributing](#️-contributing)
+- [Contributing](#contributing)
   - [Prerequisites](#prerequisites)
   - [Setup](#setup)
-- [🧪 Testing](#-testing)
+- [Testing](#testing)
   - [Custom Presets](#custom-presets)
 
-## ✨ Features
+## Features
 
 ### What does this do?
 
-- 🎮 **50+ Supported Games**: Rocket League, League of Legends, CS2, Valorant, Dota 2, Overwatch, and many more
-- 📱 **Universal Compatibility**: Works with Google Calendar, Apple Calendar, Outlook, iOS, Android
-- 🔍 **Smart Filtering**: Filter by competition names, team names, or both
-- ⚡ **Real-time Updates**: Calendar automatically updates when new matches are scheduled
-- 🎯 **Preset Configurations**: Pre-built filters for popular tournaments (RLCS, Worlds, Majors)
-- 🔧 **Advanced Options**: Regex support, team name matching, past match inclusion
-- 📊 **Built-in Analytics**: Track usage and performance metrics
-- 🌐 **Web Interface**: User-friendly URL builder with live preview
+- **50+ Supported Games**: Rocket League, League of Legends, CS2, Valorant, Dota 2, Overwatch, and [many more](/meta/supportedGames.md)
+- **Universal Compatibility**: Works with Google Calendar, Apple Calendar, Outlook, iOS, Android
+- **Custom Filters**: Filter by competition names, team names, or both
+- **Real-time Updates**: Calendar automatically updates when new matches are scheduled
+- **Preset Configurations**: Pre-built filters for popular tournaments (RLCS, Worlds, Majors)
+- **Advanced Options**: Regex support, team name matching, past match inclusion
+- **Web Interface**: User-friendly [URL builder](https://esports-calendar.snwfdhmp.com) with live preview
 
-### What you get
-
-<img width="400" height="282" alt="image" src="https://github.com/user-attachments/assets/f59fd63c-2d47-40fa-a462-336eb84110a0" />
-
-- Event summary contains:
-  - teams **short names (eg: VIT vs KC)**
-  - competition name
-  - type of match (eg: Bo3) if available
-  - score if the match already started
-- Event details contains:
-  - team **full names (eg: Vitality vs Karmine Corp)**
-  - competition name
-  - type of match (eg: Bo3) if available
-  - score if the match already started
-
-### Additional iCal tags
-
-The event ICS also contains some useful custom iCal tags for scripting or custom integrations.
-
-|name|example|
-|---|---|
-|X-LIQUIPEDIATOICAL-COMPETITION|RLCS Worlds 2025|
-|X-LIQUIPEDIATOICAL-TEAMLEFT|KC|
-|X-LIQUIPEDIATOICAL-TEAMLEFTFULLNAME|Karmine Corp|
-|X-LIQUIPEDIATOICAL-TEAMLEFTURL|https://liquipedia.net/rocketleague/Karmine_Corp|
-|X-LIQUIPEDIATOICAL-TEAMLEFTLOGO|https://liquipedia.net/commons/images/thumb/1/1e/Karmine_Corp_2020_lightmode.png/600px-Karmine_Corp_2020_lightmode.png|
-|X-LIQUIPEDIATOICAL-TEAMRIGHT|G2|
-|X-LIQUIPEDIATOICAL-TEAMRIGHTFULLNAME|G2 Esports|
-|X-LIQUIPEDIATOICAL-TEAMRIGHTURL|https://liquipedia.net/rocketleague/G2_Esports|
-|X-LIQUIPEDIATOICAL-TEAMRIGHTLOGO|https://liquipedia.net/commons/images/thumb/d/da/G2_Esports_2020_lightmode.png/600px-G2_Esports_2020_lightmode.png|
-|X-LIQUIPEDIATOICAL-WINNERSIDE|left|
-|X-LIQUIPEDIATOICAL-DESCRIPTOR|Grand Final|
-|X-LIQUIPEDIATOICAL-DESCRIPTORMOREINFO|...|
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Option 1: Use the Web Interface _(For non-devs)_
 
@@ -126,7 +92,42 @@ Available presets:
 
 > If you want to add your preset, feel free to update [the preset file](src/presets.ts)
 
-## 📖 API Documentation
+
+## What you get
+
+<img width="400" height="282" alt="image" src="https://github.com/user-attachments/assets/f59fd63c-2d47-40fa-a462-336eb84110a0" />
+
+- Event summary contains:
+  - teams **short names (eg: VIT vs KC)**
+  - competition name
+  - type of match (eg: Bo3) if available
+  - score if the match already started
+- Event details contains:
+  - team **full names (eg: Vitality vs Karmine Corp)**
+  - competition name
+  - type of match (eg: Bo3) if available
+  - score if the match already started
+
+### Additional iCal tags
+
+The event ICS also contains some useful custom iCal tags for scripting or custom integrations.
+
+|name|example|
+|---|---|
+|X-LIQUIPEDIATOICAL-COMPETITION|RLCS Worlds 2025|
+|X-LIQUIPEDIATOICAL-TEAMLEFT|KC|
+|X-LIQUIPEDIATOICAL-TEAMLEFTFULLNAME|Karmine Corp|
+|X-LIQUIPEDIATOICAL-TEAMLEFTURL|https://liquipedia.net/rocketleague/Karmine_Corp|
+|X-LIQUIPEDIATOICAL-TEAMLEFTLOGO|https://liquipedia.net/commons/images/thumb/1/1e/Karmine_Corp_2020_lightmode.png/600px-Karmine_Corp_2020_lightmode.png|
+|X-LIQUIPEDIATOICAL-TEAMRIGHT|G2|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTFULLNAME|G2 Esports|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTURL|https://liquipedia.net/rocketleague/G2_Esports|
+|X-LIQUIPEDIATOICAL-TEAMRIGHTLOGO|https://liquipedia.net/commons/images/thumb/d/da/G2_Esports_2020_lightmode.png/600px-G2_Esports_2020_lightmode.png|
+|X-LIQUIPEDIATOICAL-WINNERSIDE|left|
+|X-LIQUIPEDIATOICAL-DESCRIPTOR|Grand Final|
+|X-LIQUIPEDIATOICAL-DESCRIPTORMOREINFO|...|
+
+## API Documentation
 
 ### Base Endpoint
 ```
@@ -165,7 +166,7 @@ It will merge events from the 3 configurations
 GET /preset/:name
 ```
 
-## 🎮 Supported Games
+## Supported Games
 
 The service supports **50+ esports titles** including:
 
@@ -182,7 +183,7 @@ The service supports **50+ esports titles** including:
 
 [View complete list of supported games](meta/supportedGames.md)
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -204,7 +205,7 @@ The service supports **50+ esports titles** including:
 - 💬 Contact on Discord: `mjo___`
 - 🌐 Test your URL at [ics.snwfdhmp.com](https://ics.snwfdhmp.com)
 
-## 🛠️ Contributing
+## Contributing
 
 ### Prerequisites
 
@@ -227,7 +228,7 @@ pnpm run dev
 pnpm run test
 ```
 
-## 🧪 Testing
+## Testing
 
 ### How to run the tests
 
