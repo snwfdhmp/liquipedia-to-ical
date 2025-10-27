@@ -51,6 +51,7 @@ Consider giving it a ⭐️ if you like it to show your support!
 - **Preset Configurations**: Pre-built filters for popular tournaments (RLCS, Worlds, Majors)
 - **Advanced Options**: Regex support, team name matching, past match inclusion
 - **Web Interface**: User-friendly [URL builder](https://esports-calendar.snwfdhmp.com) with live preview
+- **MCP Server**: Plug our MCP to your AI Chatbot and get realtime information!
 
 ## Quick Start
 
@@ -91,6 +92,10 @@ Available presets:
 - `rocket-league` - All Rocket League matches
 
 > If you want to add your preset, feel free to update [the preset file](src/presets.ts)
+
+### Option 4: Use the MCP
+
+Import this server into ChatGPT or any other MCP client: `https://esports-calendar-mcp.snwfdhmp.com/`
 
 
 ## What you get
