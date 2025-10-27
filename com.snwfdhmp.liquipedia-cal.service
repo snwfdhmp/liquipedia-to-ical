@@ -8,6 +8,8 @@ ExecStart=/usr/local/bin/pnpm start -q
 Restart=on-failure
 RestartSec=10
 SyslogIdentifier=com.snwfdhmp.liquipedia-cal
+HTTP_PORT=9059
+MCP_PORT=7488
 
 [Install]
 WantedBy=multi-user.target
