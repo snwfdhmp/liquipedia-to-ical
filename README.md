@@ -1,4 +1,4 @@
-# 📅 Liquipedia Calendar - Sync Esports Matches to Your Calendar
+# 📅 Esports Calendar - Sync Esports Matches to Your Calendar using iCS / iCAL
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-brightgreen.svg)](https://nodejs.org/)
@@ -10,7 +10,7 @@
 
 <img src="https://i.imgur.com/LYT2wIt.png" alt="Example Calendar Event" width="484">
 
-**Automatically sync esports matches from Liquipedia to your calendar** with customizable filters for competitions and teams. Works with Google Calendar, Apple Calendar, Outlook, and any calendar application that supports iCal/ICS feeds.
+**Automatically sync esports matches to your calendar** with customizable filters for competitions and teams. Works with Google Calendar, Apple Calendar, Outlook, and any calendar application that supports iCal/ICS feeds.
 
 Consider giving it a ⭐️ if you like it to show your support!
 
