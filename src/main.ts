@@ -47,3 +47,5 @@ if (process.argv[2] === "test") {
     console.log(`MCP API started on 0.0.0.0:${MCP_PORT}`)
   })
 }
+
+

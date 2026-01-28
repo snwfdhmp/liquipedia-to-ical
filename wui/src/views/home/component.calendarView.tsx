@@ -6,6 +6,7 @@ import { parseCalendar, type NonStandard } from "@/utils.ics.js"
 import { wrapUrl, relativeDate, capitalize } from "@/utils.js"
 import clsx from "clsx"
 import { GameConfigurator } from "./component.gameConfigurator.js"
+import { FaRegFaceTired } from "react-icons/fa6"
 
 export const CalendarView = () => {
   return (
@@ -157,55 +158,67 @@ export function CalendarViewContent() {
             {capitalize(relativeDate(new Date(date)))}
           </div>
           {events.map((event) => (
-            <div
-              key={event.uid}
-              className="border-b border-neutral-300 pb-2 flex flex-col gap-2 w-full"
-            >
-              <div className="flex flex-row justify-center">
-                <div className="flex flex-col items-center justify-center gap-4">
-                  <div className="text-xl">
-                    {event.start.date.toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })}
-                  </div>
-                  <div className="flex flex-row gap-4 justify-start items-center">
-                    <Side
-                      side="left"
-                      teamName={event.nonStandard.teamLeft}
-                      teamFullName={event.nonStandard.teamLeftFullName}
-                      url={event.nonStandard.teamLeftUrl}
-                      logo={event.nonStandard.teamLeftLogo}
-                    />
-                    <div className="text-xl w-32 text-center">
-                      {event.nonStandard.descriptor || "vs"}
-                    </div>
-                    <Side
-                      side="right"
-                      teamName={event.nonStandard.teamRight}
-                      teamFullName={event.nonStandard.teamRightFullName}
-                      url={event.nonStandard.teamRightUrl}
-                      logo={event.nonStandard.teamRightLogo}
-                    />
-                  </div>
-                  <div className="flex flex-row justify-center opacity-50 hover:opacity-100 transition-opacity duration-300">
-                    <div>
-                      <a
-                        href={event.nonStandard.competitionUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {event.nonStandard.competition}
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Event key={event.uid} event={event} />
           ))}
         </div>
       ))}
+    </div>
+  )
+}
+
+export function Event({ event }: { event: IcsEvent<NonStandard> }) {
+  const hasNoTeams = useMemo(() => {
+    return !event.nonStandard.teamLeft && !event.nonStandard.teamRight
+  }, [event])
+
+  return (
+    <div
+      key={event.uid}
+      className="border-b border-neutral-300 pb-2 flex flex-col gap-2 w-full"
+    >
+      <div className="flex flex-row justify-center">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="text-xl">
+            {event.start.date.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            })}
+          </div>
+          {hasNoTeams ? null : (
+            <div className="flex flex-row gap-4 justify-start items-center">
+              <Side
+                side="left"
+                teamName={event.nonStandard.teamLeft}
+                teamFullName={event.nonStandard.teamLeftFullName}
+                url={event.nonStandard.teamLeftUrl}
+                logo={event.nonStandard.teamLeftLogo}
+              />
+              <div className="text-xl w-32 text-center">
+                {event.nonStandard.descriptor || "vs"}
+              </div>
+              <Side
+                side="right"
+                teamName={event.nonStandard.teamRight}
+                teamFullName={event.nonStandard.teamRightFullName}
+                url={event.nonStandard.teamRightUrl}
+                logo={event.nonStandard.teamRightLogo}
+              />
+            </div>
+          )}
+          <div className="flex flex-row justify-center opacity-50 hover:opacity-100 transition-opacity duration-300">
+            <div>
+              <a
+                href={event.nonStandard.competitionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {event.nonStandard.competition}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
