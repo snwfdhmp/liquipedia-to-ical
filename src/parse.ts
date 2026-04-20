@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio"
-import { getRandomAxios } from "./proxies.js"
+import { getWithProxyFailover } from "./proxies.js"
 import { getCache, setCache } from "./cache.js"
 import { ParserOptions, EventData } from "./types.js"
 
@@ -464,10 +464,10 @@ export const parseEventsFromUrl = async (
   }
 
   const events = []
-  const proxyAxios = await getRandomAxios()
+  const response = await getWithProxyFailover(url)
 
   // @ts-ignore
-  const $ = cheerio.load((await proxyAxios.get(url)).data)
+  const $ = cheerio.load(response.data)
 
   // the different selectors to try, depends on page layout
   const matchSelectorsToTry = [".wikitable", ".match", ".match-info"]

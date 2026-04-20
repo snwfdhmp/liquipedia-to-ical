@@ -1,4 +1,8 @@
-import axios, { type AxiosInstance, type AxiosProxyConfig } from "axios"
+import axios, {
+  type AxiosInstance,
+  type AxiosProxyConfig,
+  type AxiosResponse,
+} from "axios"
 import dotenv from "dotenv"
 import axiosRetry from "axios-retry"
 patchAxiosWithRetryLogic(axios)
@@ -107,10 +111,51 @@ export async function getRandomAxios(): Promise<AxiosInstance> {
 }
 
 function patchAxiosWithRetryLogic(instance: AxiosInstance) {
+  // Per-instance retries handle transient network glitches / 5xx on the same
+  // proxy. Bans (403/407/429) are handled by proxy-level failover below, so we
+  // keep this low to avoid multiplying latency when a proxy is permanently bad.
   axiosRetry(instance, {
-    retries: 5,
-    retryDelay: (retryCount) => {
-      return retryCount * 1000
-    },
+    retries: 2,
+    retryDelay: (retryCount) => retryCount * 500,
   })
+}
+
+/**
+ * GET a URL with proxy failover.
+ *
+ * Tries up to `maxAttempts` distinct proxy instances, rotating to a new one on
+ * any failure (proxy ban, auth error, rate limit, network error, 5xx). This
+ * makes the service resilient to individual proxies being banned or having
+ * their credentials revoked, which happens regularly with our proxy pool.
+ */
+export async function getWithProxyFailover(
+  url: string,
+  opts: { maxAttempts?: number } = {}
+): Promise<AxiosResponse> {
+  if (axiosInstances.length === 0) {
+    await initAxiosInstances()
+  }
+
+  const maxAttempts = Math.min(
+    opts.maxAttempts ?? 5,
+    Math.max(axiosInstances.length, 1)
+  )
+
+  let lastError: unknown
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const instance = await getRandomAxios()
+    try {
+      return await instance.get(url)
+    } catch (error: any) {
+      lastError = error
+      const status = error?.response?.status
+      const proxyHost = error?.request?.host || error?.config?.proxy?.host
+      console.warn(
+        `Proxy attempt ${attempt}/${maxAttempts} failed for ${url} (status=${
+          status ?? "network"
+        }, proxy=${proxyHost ?? "?"}): ${error?.message ?? error}`
+      )
+    }
+  }
+  throw lastError
 }
