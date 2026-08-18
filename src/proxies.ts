@@ -21,7 +21,14 @@ dotenv.config({
 export async function getProxies(): Promise<string[]> {
   try {
     const response = await axios.get(process.env.PROXY_FETCH_URL)
-    return response.data.split("\n").filter((line) => line.length > 0)
+    // The provider serves this list with CRLF terminators. Splitting on "\n"
+    // alone leaves a trailing "\r" on every line, which ends up inside the
+    // proxy password and makes every request fail with 407 Proxy
+    // Authentication Required.
+    return response.data
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
   } catch (error) {
     console.error("Error while fetching proxies from proxy fetch URL", error)
     return null
