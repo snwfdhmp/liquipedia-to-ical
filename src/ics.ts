@@ -90,11 +90,17 @@ const unwrapIcs = (ics: string) => {
 }
 
 export const mergeIcs = (ics1: string, ics2: string) => {
-  const mergedIcs = wrapIcs([unwrapIcs(ics1), unwrapIcs(ics2)].join("\n"))
-  // remove duplicates
+  // Build the body first and wrap exactly once on the way out. This used to
+  // wrap up front and then wrap again on the no-events path, which emitted a
+  // VCALENDAR nested inside a VCALENDAR -- not legal per RFC 5545. It only
+  // showed up when a merge produced no events, which is the normal state of
+  // every preset between seasons, so all preset subscribers were being served
+  // a malformed feed.
+  const mergedBody = [unwrapIcs(ics1), unwrapIcs(ics2)].join("\n")
 
-  const events = mergedIcs.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g)
-  if (!events) return wrapIcs(mergedIcs)
+  // remove duplicates
+  const events = mergedBody.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g)
+  if (!events) return wrapIcs(mergedBody)
 
   const uids = new Set()
   const uniqueEvents = events.filter((event) => {
