@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio"
 import { getWithProxyFailover } from "./proxies.js"
+import { fetchWikiPageHtml, parseWikiUrl } from "./liquipediaApi.js"
 import { getCache, setCache } from "./cache.js"
 import { ParserOptions, EventData } from "./types.js"
 
@@ -445,6 +446,35 @@ const parseMatchFromElement = (
   }
 }
 
+// Prefer the MediaWiki API, which is not behind Cloudflare Turnstile, and keep
+// the proxy scrape as the fallback for URLs that are not liquipedia.net wiki
+// pages (callers may pass an arbitrary url) or for the day the API is down.
+const getPageHtml = async (url: string): Promise<string> => {
+  const ref = parseWikiUrl(url)
+  if (ref) {
+    try {
+      return await fetchWikiPageHtml(ref)
+    } catch (e) {
+      console.warn(
+        `Liquipedia API fetch failed for ${url}, falling back to scraping: ${
+          e instanceof Error ? e.message : e
+        }`
+      )
+    }
+  }
+
+  const response = await getWithProxyFailover(url)
+  return response.data
+}
+
+// Requests for one page arrive in bursts: every preset resolves to the same
+// wiki page, and rlcs-enjoyer fans out to four sub-presets at once. The cache
+// is only written after a fetch completes, so on a cold cache those four all
+// miss and become four API calls -- which, serialised behind the 30s parse
+// rate limit, makes the outermost request wait two minutes and time out.
+// Sharing the in-flight promise collapses them back into one fetch.
+const inFlightByCacheKey = new Map<string, Promise<EventData[]>>()
+
 /**
  * Parse all events from a URL
  *
@@ -463,11 +493,31 @@ export const parseEventsFromUrl = async (
     return cached
   }
 
+  const inFlight = inFlightByCacheKey.get(cacheKey)
+  if (inFlight) {
+    return inFlight
+  }
+
+  const pending = parseEventsFromUrlUncached(url, cacheKey, opts, verbose)
+  inFlightByCacheKey.set(cacheKey, pending)
+  try {
+    return await pending
+  } finally {
+    inFlightByCacheKey.delete(cacheKey)
+  }
+}
+
+const parseEventsFromUrlUncached = async (
+  url: string,
+  cacheKey: string,
+  opts: ParserOptions,
+  verbose: (...args: any[]) => void
+): Promise<EventData[]> => {
   const events = []
-  const response = await getWithProxyFailover(url)
+  const html = await getPageHtml(url)
 
   // @ts-ignore
-  const $ = cheerio.load(response.data)
+  const $ = cheerio.load(html)
 
   // the different selectors to try, depends on page layout
   const matchSelectorsToTry = [".wikitable", ".match", ".match-info"]

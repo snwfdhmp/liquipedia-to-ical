@@ -89,7 +89,10 @@ async function initAxiosInstances(): Promise<void> {
       )
     }
     for (const proxy of proxies) {
-      console.log(`Creating axios instance with proxy ${proxy}`)
+      // Deliberately not logged per proxy: the entries are
+      // "host:port:username:password", so this wrote the proxy credentials to
+      // the journal 500 times on every start, in cleartext and readable by
+      // anything that can read the journal. The count below is enough.
       axiosInstances.push(createAxiosInstance(proxy))
     }
     console.log(`Created ${axiosInstances.length} axios instances`)

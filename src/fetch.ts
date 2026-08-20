@@ -140,7 +140,19 @@ export async function fetchMatches(url: string, opts: ParserOptions) {
 
     return uniqueEvents
   } catch (error) {
-    console.error("Erreur lors de la récupération des matchs:", error)
+    // Log the shape of the failure, never the error object. Axios errors carry
+    // the whole request and response, which meant one line of code produced
+    // ~180 journal lines per failure -- 1.5M lines/day at the 2026 failure
+    // rate, over half of all journald volume, cutting log retention for every
+    // other service on the box to hours. The dumped request headers also
+    // included the proxy Basic auth credentials in cleartext.
+    const status = (error as any)?.response?.status
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(
+      `Erreur lors de la récupération des matchs (url=${url}${
+        status ? `, status=${status}` : ""
+      }): ${message}`
+    )
     throw error
   }
 }
