@@ -447,20 +447,31 @@ const parseMatchFromElement = (
 }
 
 // Prefer the MediaWiki API, which is not behind Cloudflare Turnstile, and keep
-// the proxy scrape as the fallback for URLs that are not liquipedia.net wiki
-// pages (callers may pass an arbitrary url) or for the day the API is down.
+// the proxy scrape as the fallback for the day the API is down. It is no longer
+// the fallback for URLs that are not liquipedia.net wiki pages: Turnstile means
+// scraping one cannot succeed, so those are rejected up front instead.
 const getPageHtml = async (url: string): Promise<string> => {
   const ref = parseWikiUrl(url)
-  if (ref) {
-    try {
-      return await fetchWikiPageHtml(ref)
-    } catch (e) {
-      console.warn(
-        `Liquipedia API fetch failed for ${url}, falling back to scraping: ${
-          e instanceof Error ? e.message : e
-        }`
-      )
-    }
+
+  // Nothing downstream can do anything useful with a URL we cannot turn into a
+  // wiki + page. It used to fall through to the scraping path, which spent five
+  // proxy attempts collecting 403s and then handed a Turnstile page (or, for an
+  // api.php URL, a JSON body) to cheerio. Failing here instead turns it into the
+  // 400 the route already knows how to send.
+  if (!ref) {
+    throw new Error(
+      `Not a Liquipedia wiki page URL: ${url}. Expected something like https://liquipedia.net/rocketleague/Liquipedia:Matches`
+    )
+  }
+
+  try {
+    return await fetchWikiPageHtml(ref)
+  } catch (e) {
+    console.warn(
+      `Liquipedia API fetch failed for ${url}, falling back to scraping: ${
+        e instanceof Error ? e.message : e
+      }`
+    )
   }
 
   const response = await getWithProxyFailover(url)
@@ -521,12 +532,21 @@ const parseEventsFromUrlUncached = async (
 
   // the different selectors to try, depends on page layout
   const matchSelectorsToTry = [".wikitable", ".match", ".match-info"]
-  let elements = tryMultipleSelectors($, matchSelectorsToTry) || []
-  if (!elements) elements = []
+  // No `|| []` here. tryMultipleSelectors returns null when nothing matched,
+  // and `null || []` produced a plain Array -- which has no .each(), so every
+  // page whose layout we do not recognise threw "elements.each is not a
+  // function" instead of simply yielding no matches. The throw was caught below
+  // and turned into an empty calendar, so the only visible symptom was ~90
+  // TypeErrors a day in the journal. A page with no matches on it is not an
+  // error, so leave events empty and say so once.
+  const elements = tryMultipleSelectors($, matchSelectorsToTry)
+  if (!elements) {
+    verbose(`no match elements found on ${url} (tried ${matchSelectorsToTry.join(", ")})`)
+  }
 
   // ================ FOR EACH MATCH ================
   try {
-    elements.each((index, element) => {
+    elements?.each((index, element) => {
       try {
         const eventData = parseMatchFromElement($, element, opts, verbose)
         if (!eventData) return

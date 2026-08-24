@@ -68,10 +68,24 @@ export const parseWikiUrl = (url: string): WikiPageRef | null => {
   }
 
   if (parsed.hostname.toLowerCase() !== "liquipedia.net") return null
-  // Already an API call - leave it alone rather than wrapping it twice.
-  if (parsed.pathname.endsWith("/api.php")) return null
 
   const segments = parsed.pathname.split("/").filter(Boolean)
+
+  // Someone hand-built an API URL instead of copying the wiki page URL out of
+  // their browser. It carries the same two facts we need -- the wiki as the
+  // first path segment, the page in ?page= -- so read them instead of
+  // rejecting the request. This used to return null for anything ending in
+  // /api.php, which sent the caller down the scraping fallback and ended in a
+  // cheerio error on a JSON body.
+  if (segments[segments.length - 1] === "api.php") {
+    const page = parsed.searchParams.get("page")
+    // Needs BOTH. "liquipedia.net/api.php?page=X" has no wiki in it and there
+    // is no sane default -- the same page title exists on many wikis -- so
+    // that one stays unresolvable and the caller gets a 400.
+    if (segments.length < 2 || !page) return null
+    return { wiki: segments[0]!, page }
+  }
+
   if (segments.length < 2) return null
 
   const [wiki, ...rest] = segments
